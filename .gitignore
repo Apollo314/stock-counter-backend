@@ -1,0 +1,7 @@
+__pycache__
+.env
+media/
+static/
+*.sqlite3
+htmlcov
+.coverage
