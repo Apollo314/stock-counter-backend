@@ -1,10 +1,15 @@
 from decimal import Decimal
 from pathlib import Path
+from typing import List, Optional
 
+from django.core.cache import cache
 from django.db import models
 from django.db.models import QuerySet
+from django.db.models.aggregates import Sum
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from simple_history.models import HistoricalRecords
+from utilities.caches import persistent_cached_property
 
 from utilities.common_model_mixins import CreateUpdateInfo
 from utilities.enums import KDV, Currency, StockMovementType
@@ -133,9 +138,22 @@ class WarehouseItemStock(models.Model):
         null=True,
         related_name="stocks",
     )  # probably dangerous if it was CASCADE
-    amount: Decimal = models.DecimalField(
-        "Stok Miktarı", max_digits=19, decimal_places=4, default=0
-    )
+
+    @persistent_cached_property(timeout=10)
+    def amount(self) -> Decimal:
+        stock_movements = self.stockmovement_set.all()
+        agg_sum = stock_movements.aggregate(Sum("amount"))
+        return str(Decimal(agg_sum["amount__sum"]))
+
+    def refresh_from_db(
+        self, using: Optional[str] = None, fields: Optional[List[str]] = None
+    ) -> None:
+        try:
+            # to remove cache
+            self.amount = None
+        except:
+            pass
+        return super().refresh_from_db(using, fields)
 
     class Meta:
         unique_together = [["item", "warehouse"]]
@@ -145,13 +163,6 @@ class WarehouseItemStock(models.Model):
 
 
 class StockMovement(CreateUpdateInfo):
-    STOCK_MOVEMENT_TYPE_NEGATE_MAP = {
-        StockMovementType.purchase: False,
-        StockMovementType.refund_purchase: True,
-        StockMovementType.sale: True,
-        StockMovementType.refund_sale: False,
-    }
-
     warehouse_item_stock: WarehouseItemStock = models.ForeignKey(
         WarehouseItemStock, verbose_name="Stok", on_delete=models.CASCADE
     )
@@ -161,20 +172,11 @@ class StockMovement(CreateUpdateInfo):
         decimal_places=4,
         validators=[not_zero_validator],
     )
-    movement_type = models.CharField(max_length=20, choices=StockMovementType.choices)
-
     # if moving from one warehouse to another, this will not be null,
     # while selling, or purchasing, etc. it will be null.
     related_movement: "StockMovement" = models.OneToOneField(
         "self", on_delete=models.CASCADE, blank=True, null=True
     )
-
-    @property
-    def signed_amount(self):
-        multiplier = (-1) ** StockMovement.STOCK_MOVEMENT_TYPE_NEGATE_MAP[
-            self.movement_type
-        ]
-        return self.amount * multiplier
 
     def __str__(self):
         direction = "> >" if self.amount > 0 else "< <"
