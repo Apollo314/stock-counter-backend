@@ -21,6 +21,7 @@ class ModelSerializer(ModelSerializer_):
         **ModelSerializer_.serializer_field_mapping,
         **serializer_field_mapping_override,
     }
+
     def build_standard_field(self, field_name, model_field):
         field_class, field_kwargs = super().build_standard_field(
             field_name, model_field

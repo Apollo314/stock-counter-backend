@@ -3,6 +3,7 @@ from rest_framework import serializers
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from users.serializers import UserSerializer
 
+
 class LoginSerializer(AuthTokenSerializer):
     user = UserSerializer(read_only=True)
 

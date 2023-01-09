@@ -14,6 +14,7 @@ def week_from_now():
     now = timezone.now()
     return now + timedelta(weeks=1)
 
+
 class Invoice(CreateUpdateInfo):
     """Satış, Alış ya da iade faturası"""
 
@@ -60,7 +61,7 @@ class Invoice(CreateUpdateInfo):
         verbose_name=("Alakalı Fatura(lar)"),
         related_name="refund_invoice",
         blank=True,
-        symmetrical=False
+        symmetrical=False,
     )
 
     def __str__(self):

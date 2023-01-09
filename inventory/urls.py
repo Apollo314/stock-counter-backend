@@ -15,5 +15,5 @@ router.register("stock-movement", views.StockMovementViewset)
 
 urlpatterns = [
     path("", include(router.urls)),
-    path('bulk/', include(url_patterns)),
+    path("bulk/", include(url_patterns)),
 ]

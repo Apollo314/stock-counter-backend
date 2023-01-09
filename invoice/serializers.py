@@ -5,10 +5,13 @@ from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers, validators
 from rest_framework.exceptions import ValidationError
 
-from inventory.serializers import \
-    StockMovementNestedSerializer as StockMovementNestedSerializer_
-from inventory.serializers import (WarehouseItemStockNestedSerializer,
-                                   WarehouseSerializer)
+from inventory.serializers import (
+    StockMovementNestedSerializer as StockMovementNestedSerializer_,
+)
+from inventory.serializers import (
+    WarehouseItemStockNestedSerializer,
+    WarehouseSerializer,
+)
 from invoice import models
 from stakeholder.serializers import StakeholderSerializer
 from utilities.serializers import CreateListSerializer, ModelSerializer

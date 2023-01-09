@@ -38,5 +38,5 @@ class ItemSchemaInLight(ModelSchema):
             "buyprice",
             "buycurrency",
             "sellprice",
-            "sellcurrency"
-            ]
+            "sellcurrency",
+        ]

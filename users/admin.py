@@ -14,8 +14,7 @@ class UserAdmin(SimpleHistoryAdmin):
         "is_superuser",
         "date_joined",
     )
-    list_filter = ['is_superuser', 'is_staff', 'date_joined', 'is_active']
+    list_filter = ["is_superuser", "is_staff", "date_joined", "is_active"]
 
 
 admin.site.register(User, UserAdmin)
-
