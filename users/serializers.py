@@ -42,4 +42,3 @@ class UserSerializer(ModelSerializer):
 
 class UserWithGroupDetailSerializer(UserSerializer):
     groups = GroupDetailSerializer(many=True, required=False)
-

@@ -81,7 +81,9 @@ class TestAppModels(TestCase):
             amount=sale_refund_stock,
             movement_type=StockMovementType.refund_sale,
         )
-        self.assertEqual(current_stock + sale_refund_stock, self.warehouse_item_stock.amount)
+        self.assertEqual(
+            current_stock + sale_refund_stock, self.warehouse_item_stock.amount
+        )
 
     def test_refund_purchase_movement_decreases_the_stock(self):
         current_stock = self.warehouse_item_stock.amount
@@ -91,7 +93,9 @@ class TestAppModels(TestCase):
             amount=purchase_refund_stock,
             movement_type=StockMovementType.refund_purchase,
         )
-        self.assertEqual(current_stock - purchase_refund_stock, self.warehouse_item_stock.amount)
+        self.assertEqual(
+            current_stock - purchase_refund_stock, self.warehouse_item_stock.amount
+        )
 
     def test_sale_movement_decreases_the_stock(self):
         current_stock = self.warehouse_item_stock.amount

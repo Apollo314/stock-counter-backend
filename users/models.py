@@ -11,9 +11,7 @@ def get_profile_image_location(instance: "User", filename: str):
 
 
 class User(AbstractUser):
-    phone = models.CharField('Telefon', max_length=15, null=True, blank=True)
+    phone = models.CharField("Telefon", max_length=15, null=True, blank=True)
     avatar: ImageField = models.ImageField(
         "Kullanıcı Resmi", upload_to=get_profile_image_location, null=True, blank=True
     )
-
-    

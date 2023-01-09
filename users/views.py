@@ -17,7 +17,7 @@ class GroupViewset(ModelViewSet):
 
 
 class UserViewset(ModelViewSet):
-    queryset = User.objects.prefetch_related('groups').all()
+    queryset = User.objects.prefetch_related("groups").all()
     serializer_class = users_serializers.UserSerializer
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ["first_name", "last_name", "email", "username"]
@@ -41,9 +41,9 @@ class UserViewset(ModelViewSet):
             }
         },
         "groups": {
-            'in': {
-                'component': 'user-group-selector',
-                'props': {'label': 'Kullanıcı Grubu'}
+            "in": {
+                "component": "user-group-selector",
+                "props": {"label": "Kullanıcı Grubu"},
             }
         },
         "is_staff": {
@@ -63,7 +63,7 @@ class UserViewset(ModelViewSet):
 
 
 class MyAccountView(GenericAPIView):
-    queryset = User.objects.prefetch_related('groups').all()
+    queryset = User.objects.prefetch_related("groups").all()
     serializer_class = users_serializers.UserWithGroupDetailSerializer
 
     def get(self, request):

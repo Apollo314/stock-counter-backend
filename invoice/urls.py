@@ -12,5 +12,5 @@ router.register("invoice", views.InvoiceViewset)
 
 urlpatterns = [
     path("", include(router.urls)),
-    path('bulk/', include(url_patterns)),
+    path("bulk/", include(url_patterns)),
 ]
