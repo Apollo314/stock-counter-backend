@@ -1,16 +1,17 @@
 from decimal import Decimal
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from django.core.cache import cache
 from django.db import models
 from django.db.models import QuerySet
 from django.db.models.aggregates import Sum
+from django.db.models.expressions import Q
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from simple_history.models import HistoricalRecords
-from utilities.caches import persistent_cached_property
 
+from utilities.caches import persistent_cached_property
 from utilities.common_model_mixins import CreateUpdateInfo
 from utilities.enums import KDV, Currency, StockMovementType
 from utilities.validators import not_zero_validator
@@ -139,17 +140,16 @@ class WarehouseItemStock(models.Model):
         related_name="stocks",
     )  # probably dangerous if it was CASCADE
 
-    @persistent_cached_property(timeout=10)
+    @persistent_cached_property(timeout=None)
     def amount(self) -> Decimal:
         stock_movements = self.stockmovement_set.all()
         agg_sum = stock_movements.aggregate(Sum("amount"))
-        return str(Decimal(agg_sum["amount__sum"]))
+        return Decimal(agg_sum["amount__sum"] or 0)
 
     def refresh_from_db(
         self, using: Optional[str] = None, fields: Optional[List[str]] = None
     ) -> None:
         try:
-            # to remove cache
             self.amount = None
         except:
             pass
@@ -164,7 +164,7 @@ class WarehouseItemStock(models.Model):
 
 class StockMovement(CreateUpdateInfo):
     warehouse_item_stock: WarehouseItemStock = models.ForeignKey(
-        WarehouseItemStock, verbose_name="Stok", on_delete=models.CASCADE
+        WarehouseItemStock, verbose_name="Stok", on_delete=models.PROTECT
     )
     amount: Decimal = models.DecimalField(
         "Miktar",

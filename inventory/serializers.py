@@ -1,17 +1,19 @@
+from decimal import Decimal
 from typing import Any, OrderedDict
 
+from drf_extra_fields.fields import Base64ImageField
 from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
 from inventory import models
-from users.serializers import UserSerializer
+from users.serializers import ConciseUserSerializer, UserSerializer
 from utilities.serializermixins import UniqueFieldsMixin
 from utilities.serializers import (
     DynamicFieldsModelSerializer,
     ModelSerializer,
     UpdateListSerializer,
 )
-from drf_extra_fields.fields import Base64ImageField
+from utilities.serialzier_helpers import CurrentUserDefault
 
 
 @extend_schema_serializer(
@@ -72,19 +74,11 @@ class WarehouseSerializer(ModelSerializer):
 
 
 class WarehouseItemStockSerializer(ModelSerializer):
+    amount = serializers.DecimalField(max_digits=19, decimal_places=4, read_only=True)
+
     class Meta:
         model = models.WarehouseItemStock
         fields = ["id", "item", "warehouse", "amount"]
-
-
-class CurrentUserDefault:
-    requires_context = True
-
-    def __call__(self, serializer_field):
-        return serializer_field.context["request"].user
-
-    def __repr__(self):
-        return "%s()" % self.__class__.__name__
 
 
 @extend_schema_serializer(
@@ -134,8 +128,8 @@ class ItemInSerializer(DynamicFieldsModelSerializer):
 class ItemOutSerializer(ItemInSerializer):
     stock_unit = StockUnitSerializer()
     category = CategorySerializer()
-    created_by = UserSerializer()
-    updated_by = UserSerializer()
+    created_by = ConciseUserSerializer()
+    updated_by = ConciseUserSerializer()
 
 
 class ItemDetailSerializer(ItemOutSerializer):
@@ -195,8 +189,24 @@ class StockUnitNestedSerializer(UniqueFieldsMixin, ModelSerializer):
         fields = ["id", "name"]
 
 
+class WarehouseItemStockINFO_ONLYSerializer(ModelSerializer):
+    """this exists so that warehouseitemstock is available in ItemNestedSerializer has access
+    to warehouseitemstock if it exists, so there won't be an unnecessary query to database
+    to get the warehouseitemstock"""
+
+    warehouse = serializers.IntegerField(write_only=True)
+    id = serializers.IntegerField()
+
+    class Meta:
+        model = models.WarehouseItemStock
+        fields = ["id", "warehouse"]
+        # on purpose
+        validators = []
+
+
 class ItemNestedSerializer(UniqueFieldsMixin, ModelSerializer):
     stock_unit = StockUnitNestedSerializer()
+    stocks = WarehouseItemStockINFO_ONLYSerializer(many=True)
     id = serializers.IntegerField(required=False)
 
     def create(self, validated_data: OrderedDict):
@@ -215,6 +225,7 @@ class ItemNestedSerializer(UniqueFieldsMixin, ModelSerializer):
             "description",
             "stock_unit",
             "barcode",
+            "stocks",
             "stock_code",
             "buyprice",
             "buycurrency",
@@ -252,33 +263,46 @@ class StockMovementNestedSerializer(ModelSerializer):
     """for creating WarehouseItemStock from StockMovement"""
 
     warehouse_item_stock = WarehouseItemStockNestedSerializer()
+    amount = serializers.DecimalField(max_digits=19, decimal_places=4)
 
-    # will be passed by InvoiceDetailSerializer downward,
-    # setting this required=False so that client side won't have to pass
-    # movement_type to every single invoiceItem
-    movement_type = serializers.CharField(required=False)
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["amount"] = "{:f}".format(abs(instance.amount))
+        return data
+
+    @staticmethod
+    def extract_warehouse_item_stock_id(warehouse_item_stock_data: OrderedDict):
+        item_data = warehouse_item_stock_data["item"]
+        warehouse = warehouse_item_stock_data["warehouse"]
+        for stock in item_data["stocks"]:
+            if stock["warehouse"] == warehouse.id:
+                return stock["id"]
 
     def create(self, validated_data: OrderedDict):
         warehouse_item_stock_data: OrderedDict[
             str, OrderedDict | Any
         ] = validated_data.pop("warehouse_item_stock")
         try:
-            warehouse_item_stock = models.WarehouseItemStock.objects.get(
-                item=warehouse_item_stock_data["item"]["id"],
-                warehouse=warehouse_item_stock_data["warehouse"],
-            )
-        except models.WarehouseItemStock.DoesNotExist:
-            #     warehouse_item_stock = models.WarehouseItemStock.objects.create(
-            #         item=warehouse_item_stock_data["item"]["id"],
-            #         warehouse=warehouse_item_stock_data["warehouse"],
-            #     )
-            # else:
-            warehouse_item_stock = WarehouseItemStockNestedSerializer().create(
+            warehouse_item_stock_id = self.extract_warehouse_item_stock_id(
                 warehouse_item_stock_data
             )
-        return super().create(
-            {**validated_data, "warehouse_item_stock": warehouse_item_stock}
+            if not warehouse_item_stock_id:
+                warehouse_item_stock_id = models.WarehouseItemStock.objects.get(
+                    item=warehouse_item_stock_data["item"]["id"],
+                    warehouse=warehouse_item_stock_data["warehouse"],
+                ).id
+        except models.WarehouseItemStock.DoesNotExist:
+            warehouse_item_stock_id = WarehouseItemStockNestedSerializer().create(
+                warehouse_item_stock_data
+            ).id
+
+        stock_movement = models.StockMovement(
+            **validated_data, warehouse_item_stock_id=warehouse_item_stock_id
         )
+        return stock_movement
+        # return super().create(
+        #     {**validated_data, "warehouse_item_stock": warehouse_item_stock}
+        # )
 
     def update(self, instance: models.StockMovement, validated_data: OrderedDict):
         # we don't really want to update WarehouseItemStock like this. so just pop it.
@@ -287,7 +311,7 @@ class StockMovementNestedSerializer(ModelSerializer):
 
     class Meta:
         model = models.StockMovement
-        fields = ["warehouse_item_stock", "amount", "related_movement", "movement_type"]
+        fields = ["warehouse_item_stock", "amount", "related_movement"]
 
 
 # TODO: Merge Items that may be duplicate with a view

@@ -37,12 +37,10 @@ class TestAppModels(TestCase):
         self.warehouse_stock_movement: StockMovement = StockMovement.objects.create(
             warehouse_item_stock=self.warehouse_item_stock,
             amount=Decimal("10.15"),
-            movement_type=StockMovementType.purchase,
         )
         self.warehouse_stock_movement2: StockMovement = StockMovement.objects.create(
             warehouse_item_stock=self.warehouse_item_stock2,
             amount=Decimal("5"),
-            movement_type=StockMovementType.purchase,
         )
 
     def test_getting_warehouse_stock_from_item_with_warehouse(self):
@@ -59,63 +57,29 @@ class TestAppModels(TestCase):
         self.added_stock: StockMovement = StockMovement.objects.create(
             warehouse_item_stock=self.warehouse_item_stock,
             amount=added_stock,
-            movement_type=StockMovementType.purchase,
         )
+        self.warehouse_item_stock.refresh_from_db()
         self.assertEqual(current_stock + added_stock, self.warehouse_item_stock.amount)
 
-    def test_sale_movement_decreases_the_stock(self):
+    def test_movement_decreases_the_stock(self):
         current_stock = self.warehouse_item_stock.amount
-        sold_stock = Decimal("4.5")
+        stock = Decimal("-4.5")
         self.sold_stock: StockMovement = StockMovement.objects.create(
             warehouse_item_stock=self.warehouse_item_stock,
-            amount=sold_stock,
-            movement_type=StockMovementType.sale,
+            amount=stock,
         )
-        self.assertEqual(current_stock - sold_stock, self.warehouse_item_stock.amount)
-
-    def test_refund_sale_movement_increases_the_stock(self):
-        current_stock = self.warehouse_item_stock.amount
-        sale_refund_stock = Decimal("3.5")
-        self.sale_refund_stock: StockMovement = StockMovement.objects.create(
-            warehouse_item_stock=self.warehouse_item_stock,
-            amount=sale_refund_stock,
-            movement_type=StockMovementType.refund_sale,
-        )
-        self.assertEqual(
-            current_stock + sale_refund_stock, self.warehouse_item_stock.amount
-        )
-
-    def test_refund_purchase_movement_decreases_the_stock(self):
-        current_stock = self.warehouse_item_stock.amount
-        purchase_refund_stock = Decimal("3.5")
-        self.purchase_refund_stock: StockMovement = StockMovement.objects.create(
-            warehouse_item_stock=self.warehouse_item_stock,
-            amount=purchase_refund_stock,
-            movement_type=StockMovementType.refund_purchase,
-        )
-        self.assertEqual(
-            current_stock - purchase_refund_stock, self.warehouse_item_stock.amount
-        )
-
-    def test_sale_movement_decreases_the_stock(self):
-        current_stock = self.warehouse_item_stock.amount
-        sold_stock = Decimal("4.5")
-        self.sold_stock: StockMovement = StockMovement.objects.create(
-            warehouse_item_stock=self.warehouse_item_stock,
-            amount=sold_stock,
-            movement_type=StockMovementType.sale,
-        )
-        self.assertEqual(current_stock - sold_stock, self.warehouse_item_stock.amount)
+        self.warehouse_item_stock.refresh_from_db()
+        self.assertEqual(current_stock + stock, self.warehouse_item_stock.amount)
 
     def test_warehouse_stock_is_updated_by_stock_movement_delete(self):
         added_stock: StockMovement = StockMovement.objects.create(
             warehouse_item_stock=self.warehouse_item_stock,
             amount=Decimal("14.34"),
-            movement_type=StockMovementType.purchase,
         )
         added_stock_amount = added_stock.amount
         current_total_stock = self.warehouse_item_stock.amount
         added_stock.delete()
+        self.warehouse_item_stock.refresh_from_db()
         self.assertEqual(
             current_total_stock - added_stock_amount, self.warehouse_item_stock.amount
         )
@@ -124,6 +88,7 @@ class TestAppModels(TestCase):
         current_total_stock = self.warehouse_item_stock.amount
         self.warehouse_stock_movement.amount += Decimal("5.15")
         self.warehouse_stock_movement.save()
+        self.warehouse_item_stock.refresh_from_db()
         self.assertEqual(
             current_total_stock + Decimal("5.15"), self.warehouse_item_stock.amount
         )
@@ -136,6 +101,7 @@ class TestAppModels(TestCase):
         toWarehouseStockBefore = self.warehouse_item_stock.amount
         self.warehouse_stock_movement2.warehouse_item_stock = self.warehouse_item_stock
         self.warehouse_stock_movement2.save()
+        self.warehouse_item_stock.refresh_from_db()
         self.warehouse_item_stock2.refresh_from_db()
 
         self.assertEqual(

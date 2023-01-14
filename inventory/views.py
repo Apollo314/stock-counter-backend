@@ -1,4 +1,7 @@
 from django.db.models import QuerySet
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from inventory import models
@@ -35,7 +38,16 @@ class StockUnitViewset(ModelViewSet):
 
 
 class ItemViewset(ModelViewSet):
-    queryset = models.Item.objects.prefetch_related("stocks").all()
+    queryset = (
+        models.Item.objects.select_related(
+            "created_by",
+            "updated_by",
+            "category",
+            "stock_unit",
+        )
+        .prefetch_related("stocks")
+        .all()
+    )
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     ordering_fields = [
         "id",
@@ -88,10 +100,8 @@ class ItemViewset(ModelViewSet):
     }
     search_fields = ["name", "description"]
 
-    def get_queryset(self):
-        qs: QuerySet = super().get_queryset()
-        qs.select_related("stock_unit", "category")
-        return qs
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -113,7 +123,7 @@ class WarehouseItemStockViewset(ReadOnlyModelViewSet):
     queryset = models.WarehouseItemStock.objects.all()
     serializer_class = inventory_serializers.WarehouseItemStockSerializer
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    search_fields = ["item__name", "amount"]
+    search_fields = ["item__name"]
     # filterset_fields = ['warehouse', 'item']
 
 

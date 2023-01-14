@@ -32,7 +32,7 @@ class StockMovementInline(admin.StackedInline):
 
 class WarehouseItemStockAdmin(admin.ModelAdmin):
     readonly_fields = ["amount"]
-    inlines = [StockMovementInline]
+    # inlines = [StockMovementInline]
 
 
 admin.site.register(WarehouseItemStock, WarehouseItemStockAdmin)

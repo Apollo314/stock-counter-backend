@@ -1,0 +1,51 @@
+version: "3.4"
+   
+# networks:
+#   lan_access:
+#     driver: bridge
+
+services:
+  redis:
+    image: redis:latest
+    restart: always
+    command:
+    - /bin/sh
+    - -c
+    - redis-server --requirepass "$${REDIS_PASSWORD:?REDIS_PASSWORD variable is not set}"
+    volumes:
+      - redisdata:/redisdata
+    ports:
+      - 6379:6379
+    env_file:
+      - .env.prod
+  db:
+    # image: postgres
+    build: 
+      context: .
+      dockerfile: ./Dockerfile_forpostgres
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+    env_file:
+      - .env.prod
+  web:
+    build: .
+    # restart: always
+    command: python manage.py runserver 0.0.0.0:8000
+    # command: uvicorn goktugv2.asgi:application --host 0.0.0.0 --port 8000
+    # command: gunicorn goktugv2.asgi:application --bind 0.0.0.0:8000 --workers 4 -k uvicorn.workers.UvicornWorker --reload
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    env_file:
+      - .env.prod
+
+volumes:
+  db:
+    driver: local
+  redisdata:
