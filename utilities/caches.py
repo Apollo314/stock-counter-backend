@@ -1,83 +1,102 @@
-from typing import Callable
+from _thread import RLock
+from typing import Any, Callable, Type 
+import warnings
 
 from django.core.cache import cache
+from functools import cached_property
+
+_NOT_FOUND = object()
+
+
+def generate_cache_name(cls: Type, property: str, pk: str | int) -> str:
+    prefix = f"{cls.__module__}.{cls.__name__}"
+    return f"{prefix}:{property}:{pk}"
 
 
 class PersistentCachedProperty:
-    """
-    Decorator that converts a method with a single self argument into a
-    property cached on cache backend.
-    set property to None to delete the cache.
-
-    A cached property can be made out of an existing method:
-    (e.g. ``url = persistent_cached_property(get_absolute_url)``).
-    """
-
-    def cache_name(self, instance):
-        cls = instance.__class__
-        prefix = f"{cls.__module__}.{cls.__name__}"
-        return f"{prefix}:{self.name}:{instance.pk}"
-
-    def set_instance_cache(self, instance, value):
-        """will be deleted with instance. not using caching backend."""
-        instance.__dict__[self.name] = value
-
-    def set_cache(self, instance, value):
-        """
-        will persist even if instance is deleted on cache backend
-        depending on timeout setting
-        """
-        cache.set(self.cache_name(instance), value, timeout=self.timeout)
-
-    def __set__(self, instance, value):
-        if value is None:
-            cache.delete(self.cache_name(instance))
-            del instance.__dict__[self.name]
-        else:
-            self.set_cache(instance, value)
-            self.set_instance_cache(instance, value)
-
-    @staticmethod
-    def func(instance):
-        ...
-
-    def __init__(self, func, timeout=None):
-        self.real_func = func
+    def __init__(self, func: Callable, timeout: int = 300):
+        self.func = func
         self.timeout = timeout
-        self.__doc__ = getattr(func, "__doc__")
-        self._cache_name = None
+        self.attrname = None
+        self.__doc__ = func.__doc__
+        self.lock = RLock()
+
+    @property
+    def cache_name(self):
+        cls = self.instance.__class__
+        return generate_cache_name(cls=cls, property=self.attrname, pk=self.instance.pk)
+
+    def set_dcache(self, value: Any):
+        try:
+            self.instance.__dict__[self.attrname] = value
+        except TypeError:
+            msg = (
+                f"The '__dict__' attribute on {type(self.instance).__name__!r} instance "
+                f"does not support item assignment for caching {self.attrname!r} property."
+            )
+            raise TypeError(msg) from None
 
     def __set_name__(self, owner, name):
-        self.name = name
-        self.func = self.real_func
+        if self.attrname is None:
+            self.attrname = name
+        elif name != self.attrname:
+            raise TypeError(
+                "Cannot assign the same cached_property to two different names "
+                f"({self.attrname!r} and {name!r})."
+            )
 
-    def __get__(self, instance, cls=None):
-        """
-        Try to get cache from cache backend, if not possible, call the function
-        and put the return value in both cache backend and instance.__dict__ so
-        that subsequent attribute access on the instance returns the cached value
-        from either cache backend or if called from the same instance from the
-        instance.__dict__ instead of calling persistent_cached_property.__get__().
-        """
+    def __set__(self, instance, value):
+        self.instance = instance
+        if value is None:
+            try:
+                cache.delete(self.cache_name)
+                del instance.__dict__[self.attrname]
+            except KeyError:
+                pass
+        else:
+            cache.set(self.cache_name, value, timeout=self.timeout)
+            instance.__dict__[self.attrname] = value
+
+    def __get__(self, instance, owner=None):
         if instance is None:
             return self
-        cache_name = self.cache_name(instance)
-        if cached_value := cache.get(cache_name):
-            self.set_instance_cache(instance, cached_value)
-            return cached_value
         else:
-            value = self.func(instance)
-            self.set_instance_cache(instance, value)
-            self.set_cache(instance, value)
-            return value
+            self.instance = instance
+        if self.attrname is None:
+            raise TypeError(
+                "Cannot use cached_property instance without calling __set_name__ on it."
+            )
+        try:
+            dcache = instance.__dict__
+        except AttributeError:  # not all objects have __dict__ (e.g. class defines slots)
+            msg = (
+                f"No '__dict__' attribute on {type(instance).__name__!r} "
+                f"instance to cache {self.attrname!r} property."
+            )
+            raise TypeError(msg) from None
+        val = dcache.get(self.attrname, _NOT_FOUND)
+        if val is _NOT_FOUND:
+            with self.lock:
+                # check if another thread filled cache while we awaited lock
+                val = dcache.get(self.attrname, _NOT_FOUND)
+                if val is _NOT_FOUND:
+                    val = cache.get(self.cache_name, _NOT_FOUND)
+                if val is _NOT_FOUND:
+                    val = self.func(instance)
+                    cache.set(self.cache_name, val, timeout=self.timeout)
+                if val is not _NOT_FOUND:
+                    self.set_dcache(val)
+        return val
 
 
-def persistent_cached_property(func: Callable = None, *, timeout: int = None):
+def persistent_cached_property(func: Callable = None, *, timeout: int = 300):
     if func and callable(func):
+        # return cached_property(func)
         return PersistentCachedProperty(func)
     else:
 
         def decorator(f):
+            # return cached_property(f)
             return PersistentCachedProperty(f, timeout=timeout)
 
         return decorator

@@ -51,18 +51,26 @@ class InvoiceViewset(ModelViewSet):
 
     def get_queryset(self):
         if self.action == "retrieve":
-            queryset = models.Invoice.objects.prefetch_related(
-                Prefetch(
-                    "items",
-                    queryset=models.InvoiceItem.objects.select_related(
-                        "stock_movement",
-                        "stock_movement__warehouse_item_stock",
-                        "stock_movement__warehouse_item_stock__item",
-                    ),
+            queryset = (
+                models.Invoice.objects.select_related(
+                    "created_by", "updated_by", "warehouse", "stakeholder"
                 )
-            ).all()
+                .prefetch_related(
+                    Prefetch(
+                        "items",
+                        queryset=models.InvoiceItem.objects.select_related(
+                            "stock_movement",
+                            "stock_movement__warehouse_item_stock",
+                            "stock_movement__warehouse_item_stock__item",
+                        ),
+                    )
+                )
+                .all()
+            )
         else:
-            queryset = models.Invoice.objects.all()
+            queryset = models.Invoice.objects.select_related(
+                "created_by", "updated_by", "warehouse", "stakeholder"
+            ).all()
         return queryset
 
     def get_serializer_class(self):

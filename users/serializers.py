@@ -40,5 +40,24 @@ class UserSerializer(ModelSerializer):
         )
 
 
+class ConciseUserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "phone",
+            "date_joined",
+            "last_login",
+            "is_active",
+            "is_staff",
+            "is_superuser",
+            "avatar",
+        )
+
+
 class UserWithGroupDetailSerializer(UserSerializer):
     groups = GroupDetailSerializer(many=True, required=False)
