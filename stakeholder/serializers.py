@@ -26,3 +26,18 @@ class StakeholderSerializer(ModelSerializer):
             "address",
             "employees",
         ]
+
+
+class StakeholderBasicSerializer(ModelSerializer):
+    class Meta:
+        model = models.Stakeholder
+        fields = [
+            "id",
+            "name",
+            "role",
+            "shortname",
+            "phone",
+            "email",
+            "vkntckn",
+            "address"
+        ]

@@ -15,7 +15,7 @@ from inventory.serializers import (
     WarehouseSerializer,
 )
 from invoice import models
-from stakeholder.serializers import StakeholderSerializer
+from stakeholder.serializers import StakeholderBasicSerializer, StakeholderSerializer
 from utilities.enums import InvoiceType
 from utilities.serializers import CreateListSerializer, ModelSerializer
 from utilities.serialzier_helpers import CurrentUserDefault
@@ -82,7 +82,7 @@ class InvoiceListSerializer(ModelSerializer):
     """For listview only"""
 
     warehouse = WarehouseSerializer()
-    stakeholder = StakeholderSerializer()
+    stakeholder = StakeholderBasicSerializer()
 
     class Meta:
         model = models.Invoice
