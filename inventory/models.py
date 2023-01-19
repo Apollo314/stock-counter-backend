@@ -164,7 +164,7 @@ class WarehouseItemStock(models.Model):
 
 class StockMovement(CreateUpdateInfo):
     warehouse_item_stock: WarehouseItemStock = models.ForeignKey(
-        WarehouseItemStock, verbose_name="Stok", on_delete=models.PROTECT
+        WarehouseItemStock, verbose_name="Stok", on_delete=models.CASCADE
     )
     amount: Decimal = models.DecimalField(
         "Miktar",

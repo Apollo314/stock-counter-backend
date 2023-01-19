@@ -1,7 +1,7 @@
 from django.db.models.signals import pre_delete, pre_save, post_save, post_delete
 from django.dispatch import receiver
 
-from inventory.models import StockMovement, Item
+from inventory.models import StockMovement, Item, WarehouseItemStock
 from utilities.signals import handle_file_field_cleanup_pre_save, handle_file_pre_delete
 from utilities.enums import StockMovementType
 
@@ -13,8 +13,8 @@ pre_delete.connect(handle_file_pre_delete, sender=Item)
 def clear_warehouse_item_stock_cache(sender, instance: StockMovement, **kwargs):
     # setting amount to None will reset the cache
     # no need to do anything else, saving is not required.
-    instance.warehouse_item_stock.amount = None
-
+    WarehouseItemStock(id=instance.warehouse_item_stock_id).amount = None
+    # instance.warehouse_item_stock.amount = None
 
 
 

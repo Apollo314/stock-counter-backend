@@ -62,6 +62,7 @@ class InvoiceViewset(ModelViewSet):
                             "stock_movement",
                             "stock_movement__warehouse_item_stock",
                             "stock_movement__warehouse_item_stock__item",
+                            "stakeholder",
                         ),
                     )
                 )

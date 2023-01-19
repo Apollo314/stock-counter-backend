@@ -112,6 +112,19 @@ class ItemViewset(ModelViewSet):
             return inventory_serializers.ItemInSerializer
 
 
+class ItemHistoryViewset(ItemViewset):
+    queryset = (
+        models.Item.history.select_related(
+            "created_by", "updated_by", "category", "stock_unit"
+        )
+        .all()
+    )
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    ordering_fields = ["id", "name", "created_at", "updated_at", "buyprice", "sellprice", "category"]
+    ordering = ["-id"]
+    search_fields = ["name", "description"]
+
+
 class WarehouseViewset(ModelViewSet):
     filter_backends = [SearchFilter]
     queryset = models.Warehouse.objects.all()
@@ -131,4 +144,4 @@ class StockMovementViewset(ModelViewSet):
     queryset = models.StockMovement.objects.all()
     serializer_class = inventory_serializers.StockMovementSerializer
     filter_backends = [SearchFilter]
-    search_fields = ["warehouse_item_stock__item__name", "amount"]
+    search_fields = ["warehouse_item_stock__item__name"]
