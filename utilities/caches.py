@@ -79,7 +79,6 @@ class PersistentCachedProperty:
             val = cache.get(self.cache_name, _NOT_FOUND)
         if val is _NOT_FOUND:
             val = self.func(instance)
-            print('self.cache_name', self.cache_name, self.instance, val)
             cache.set(self.cache_name, val, timeout=self.timeout)
         if val is not _NOT_FOUND:
             self.set_dcache(val)
