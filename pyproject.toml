@@ -27,6 +27,8 @@ django-extensions = "^3.2.1"
 drf-standardized-errors = "^0.12.3"
 lxml = "^4.9.2"
 redis = "^4.4.1"
+hiredis = "^2.1.1"
+drf-orjson-renderer = "^1.7.1"
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.6.0"
@@ -42,3 +44,13 @@ ipdb = "^0.13.11"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+strict = false
+exclude = ["**/node_modules",
+    "**/__pycache__",
+    "src/experimental",
+    "src/typestubs"
+]
+venvPath = "C:/Users/Apollo/AppData/Local/Packages/PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0/LocalCache/Local/pypoetry/Cache/virtualenvs"
+venv = "goktugv2-4yG3oDP2-py3.11"

@@ -39,7 +39,8 @@ admin.site.register(WarehouseItemStock, WarehouseItemStockAdmin)
 
 
 class StockMovementAdmin(admin.ModelAdmin):
-    list_display = ["warehouse_item_stock", "related_movement", "amount"]
+    fields = ["amount", "warehouse_item_stock"]
+    list_display = ["warehouse_item_stock", "amount"]
 
 
 admin.site.register(StockMovement, StockMovementAdmin)

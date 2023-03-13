@@ -9,9 +9,9 @@ services:
     image: redis:latest
     restart: always
     command:
-    - /bin/sh
-    - -c
-    - redis-server --requirepass "$${REDIS_PASSWORD:?REDIS_PASSWORD variable is not set}"
+      - /bin/sh
+      - -c
+      - redis-server --requirepass "$${REDIS_PASSWORD:?REDIS_PASSWORD variable is not set}"
     volumes:
       - redisdata:/redisdata
     ports:
@@ -33,9 +33,9 @@ services:
   web:
     build: .
     # restart: always
-    command: python manage.py runserver 0.0.0.0:8000
+    # command: python manage.py runserver 0.0.0.0:8000
     # command: uvicorn goktugv2.asgi:application --host 0.0.0.0 --port 8000
-    # command: gunicorn goktugv2.asgi:application --bind 0.0.0.0:8000 --workers 4 -k uvicorn.workers.UvicornWorker --reload
+    command: gunicorn goktugv2.asgi:application --bind 0.0.0.0:8000 --workers 4 -k uvicorn.workers.UvicornWorker
     volumes:
       - .:/code
     ports:

@@ -29,7 +29,7 @@ def create_employee_group() -> Group:
     return employee_group
 
 
-class TestItemCreation(TestCase):
+class TestInvoiceCreation(TestCase):
     def set_up_employee_client(self):
         self.employee_group = create_employee_group()
         self.user: User = User.objects.create_user(

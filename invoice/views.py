@@ -1,4 +1,8 @@
 from django.db.models import Prefetch
+from django.db.models.query import QuerySet
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from rest_framework import filters, mixins
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
@@ -45,6 +49,9 @@ class InvoiceViewset(ModelViewSet):
             }
         },
         "invoice_type": {"exact": {"component": "hidden"}},
+        "items__stock_movement__warehouse_item_stock__item__id": {
+            "exact": {"component": "item-select", "props": {"label": "item"}}
+        },
     }
     serializer_class = serializers.InvoiceListSerializer
     search_fields = ["name"]
@@ -62,7 +69,6 @@ class InvoiceViewset(ModelViewSet):
                             "stock_movement",
                             "stock_movement__warehouse_item_stock",
                             "stock_movement__warehouse_item_stock__item",
-                            "stakeholder",
                         ),
                     )
                 )
@@ -82,15 +88,3 @@ class InvoiceViewset(ModelViewSet):
         else:
             serializer_class = serializers.InvoiceListSerializer
         return serializer_class
-
-
-# class InvoiceItemViewset(mixins.CreateModelMixin,
-#                          mixins.UpdateModelMixin,
-#                          mixins.DestroyModelMixin,
-#                          GenericViewSet):
-#   queryset = models.InvoiceItem.objects.all()
-#   serializer_class = serializers.InvoiceItemSerializer
-
-#   def get_serializer(self, *args, **kwargs):
-#     """many=True because we want to be able to create multiple instances at once"""
-#     return super().get_serializer(*args, **kwargs, many=True)

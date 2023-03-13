@@ -38,7 +38,7 @@ def create_employee_group() -> Group:
     return employee_group
 
 
-class TestItemCreation(TestCase):
+class TestInvoice(TestCase):
     def set_up_employee_client(self):
         self.employee_group = create_employee_group()
         self.user: User = User.objects.create_user(
@@ -120,7 +120,7 @@ class TestItemCreation(TestCase):
         )
         return res
 
-    def test_employee_can_create_invoice_and_it_increases_stocks(self):
+    def test_employee_can_create_invoice_and_it_increases_and_decreases_stocks(self):
         self.amounts = [Decimal(10), Decimal(20)]
         res: Response = self.create_invoice(
             self.employee_client,
@@ -146,3 +146,15 @@ class TestItemCreation(TestCase):
         # is warehouse item stock amount updated correctly?
         self.assertEqual(self.item1.stocks.first().amount, self.amounts[0] * 2)
         self.assertEqual(self.item2.stocks.first().amount, self.amounts[1] * 2)
+
+        # create a different type of invoice to see if it decreases the amount
+        self.create_invoice(
+            self.employee_client,
+            items=[self.item1, self.item2],
+            amounts=self.amounts,
+            invoice_type=InvoiceType.sale,
+        )
+
+        # is warehouse item stock amount updated correctly?
+        self.assertEqual(self.item1.stocks.first().amount, self.amounts[0])
+        self.assertEqual(self.item2.stocks.first().amount, self.amounts[1])

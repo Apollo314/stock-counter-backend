@@ -78,6 +78,39 @@ class DjangoFilterBackend(_DjangoFilterBackend):
                     field_name[:separator_index],
                     field_name[separator_index + 2 :],
                 )
+                if not lookup in [
+                    "iexact",
+                    "contains",
+                    "icontains",
+                    "in",
+                    "gt",
+                    "gte",
+                    "lt",
+                    "lte",
+                    "startswith",
+                    "istartswith",
+                    "endswith",
+                    "iendswith",
+                    "date",
+                    "year",
+                    "iso_year",
+                    "month",
+                    "day",
+                    "week",
+                    "week_day",
+                    "iso_week_day",
+                    "quarter",
+                    "time",
+                    "hour",
+                    "minute",
+                    "second",
+                    "regex",
+                    "iregex",
+                    "range",
+                    "isnull",
+                ]:
+                    key += "__" + lookup
+                    lookup = "exact"
             else:
                 key = field_name
                 lookup = "exact"
