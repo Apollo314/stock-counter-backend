@@ -7,12 +7,13 @@ from django.db import models
 from django.db.models import QuerySet
 from django.db.models.aggregates import Sum
 from django.db.models.expressions import Q
+from django.forms import DecimalField
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from simple_history.models import HistoricalRecords
 
 from utilities.caches import persistent_cached_property
-from utilities.common_model_mixins import CreateUpdateInfo
+from utilities.common_model_mixins import CreateUpdateInfo, InactivatedMixin
 from utilities.enums import KDV, Currency, StockMovementType
 from utilities.validators import not_zero_validator
 
@@ -42,7 +43,7 @@ def get_item_image_location(instance: "Item", filename: str):
     return path
 
 
-class Item(CreateUpdateInfo):
+class Item(CreateUpdateInfo, InactivatedMixin):
     name: str = models.CharField("Ürün/Hizmet", max_length=200, unique=True)
     description: str = models.CharField(
         "Açıklama", max_length=2000, null=True, blank=True
@@ -139,18 +140,41 @@ class WarehouseItemStock(models.Model):
         null=True,
         related_name="stocks",
     )  # probably dangerous if it was CASCADE
+    amount_db: models.DecimalField = models.DecimalField(
+        "Miktar",
+        max_digits=19,
+        decimal_places=4,
+        default=None,
+        null=True,
+        blank=True
+    )
+    
+    @staticmethod
+    def update_stocks(ids: list[int]):
+        warehouse_item_stocks = WarehouseItemStock.objects.filter(ids)
+        for wis in warehouse_item_stocks:
+            wis.amount_db = None
+        WarehouseItemStock.objects.bulk_update(warehouse_item_stocks, fields=['amount_db'])
 
-    @persistent_cached_property(timeout=None)
-    def amount(self) -> Decimal:
+    def calculate_stock(self) -> Decimal:
         stock_movements = self.stockmovement_set.all()
         agg_sum = stock_movements.aggregate(Sum("amount"))
         return Decimal(agg_sum["amount__sum"] or 0)
+
+    # @persistent_cached_property(timeout=None)
+    @property
+    def amount(self) -> Decimal:
+        if self.amount_db == None:
+            self.amount_db = self.calculate_stock()
+            self.save()
+        return self.amount_db
 
     def refresh_from_db(
         self, using: Optional[str] = None, fields: Optional[List[str]] = None
     ) -> None:
         try:
-            self.amount = None
+            self.amount_db = self.calculate_stock()
+            self.save()
         except:
             pass
         return super().refresh_from_db(using, fields)
@@ -164,7 +188,7 @@ class WarehouseItemStock(models.Model):
 
 class StockMovement(CreateUpdateInfo):
     warehouse_item_stock: WarehouseItemStock = models.ForeignKey(
-        WarehouseItemStock, verbose_name="Stok", on_delete=models.PROTECT
+        WarehouseItemStock, verbose_name="Stok", on_delete=models.CASCADE
     )
     amount: Decimal = models.DecimalField(
         "Miktar",

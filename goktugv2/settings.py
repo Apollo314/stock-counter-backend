@@ -25,6 +25,7 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 DEBUG = os.environ["DEBUG"] == "True"
 ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split()
 CORS_ALLOWED_ORIGINS = os.environ["CORS_ALLOWED_ORIGINS"].split()
+# CORS_ALLOW_ALL_ORIGINS = True
 
 
 # Application definition
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # "utilities.middleware.LogMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -157,6 +159,14 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "utilities.autoschema.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 5,
+    "DEFAULT_RENDERER_CLASSES": (
+        "drf_orjson_renderer.renderers.ORJSONRenderer",
+        # "rest_framework.renderers.BrowsableAPIRenderer",
+    ),
+    "DEFAULT_PARSER_CLASSES": (
+        "drf_orjson_renderer.parsers.ORJSONParser",
+        # "rest_framework.parsers.JSONParser",
+    ),
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "knox.auth.TokenAuthentication",
         # "rest_framework.authentication.BasicAuthentication",
@@ -170,11 +180,6 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": "2/day",
     },
-    "DEFAULT_PARSER_CLASSES": [
-        # 'rest_framework.parsers.FormParser',
-        # "rest_framework.parsers.MultiPartParser",
-        "rest_framework.parsers.JSONParser",
-    ],
     "EXCEPTION_HANDLER": "utilities.exception_handler.extended_exception_handler",
 }
 
@@ -217,29 +222,29 @@ CACHES = {
 }
 
 
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     "filters": {
-#         "require_debug_true": {
-#             "()": "django.utils.log.RequireDebugTrue",
-#         }
-#     },
-#     "handlers": {
-#         "console": {
-#             "level": "DEBUG",
-#             "filters": ["require_debug_true"],
-#             "class": "logging.StreamHandler",
-#         }
-#     },
-#     "loggers": {
-#         "django.db.backends": {
-#             "level": "DEBUG",
-#             "handlers": ["console"],
-#         },
-#         # 'django': {
-#         #     'handlers': ['console'],
-#         #     'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
-#         # }
-#     },
-# }
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    # "filters": {
+    #     "require_debug_true": {
+    #         "()": "django.utils.log.RequireDebugTrue",
+    #     }
+    # },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            # "filters": ["require_debug_true"],
+            "class": "logging.StreamHandler",
+        }
+    },
+    "loggers": {
+        "django.db.backends": {
+            "level": "DEBUG",
+            "handlers": ["console"],
+        },
+        # 'django': {
+        #     'handlers': ['console'],
+        #     'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        # }
+    },
+}

@@ -80,8 +80,11 @@ class InvoiceItem(models.Model):
     )
     stock_movement: StockMovement = models.OneToOneField(
         StockMovement,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         verbose_name="Stok Hareketi",
         related_name="invoice_item",
     )
     price: Decimal = models.DecimalField("Fiyat", max_digits=19, decimal_places=4)
+
+    def __str__(self):
+        return f'{self.invoice}: {self.stock_movement}'

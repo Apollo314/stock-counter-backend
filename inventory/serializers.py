@@ -13,7 +13,7 @@ from utilities.serializers import (
     ModelSerializer,
     UpdateListSerializer,
 )
-from utilities.serialzier_helpers import CurrentUserDefault
+from utilities.serializer_helpers import CurrentUserDefault
 
 
 @extend_schema_serializer(
@@ -138,12 +138,12 @@ class ItemDetailSerializer(ItemOutSerializer):
     previous_id = serializers.SerializerMethodField(required=False)
     next_id = serializers.SerializerMethodField(required=False)
 
-    def get_previous_id(self, obj) -> int:
+    def get_previous_id(self, obj) -> int | None:
         prev_obj = self.Meta.model.objects.filter(pk__lt=obj.pk).order_by("-pk").first()
         if prev_obj:
             return prev_obj.id
 
-    def get_next_id(self, obj) -> int:
+    def get_next_id(self, obj) -> int | None:
         next_obj = self.Meta.model.objects.filter(pk__gt=obj.pk).order_by("pk").first()
         if next_obj:
             return next_obj.id
@@ -175,12 +175,6 @@ class ItemDetailSerializer(ItemOutSerializer):
         read_only_fields = ["created_at", "updated_at"]
 
 
-class StockMovementSerializer(ModelSerializer):
-    class Meta:
-        model = models.StockMovement
-        fields = ["warehouse_item_stock", "amount", "related_movement"]
-
-
 class StockUnitNestedSerializer(UniqueFieldsMixin, ModelSerializer):
     # id = serializers.IntegerField(required=False)
 
@@ -194,7 +188,7 @@ class WarehouseItemStockINFO_ONLYSerializer(ModelSerializer):
     to warehouseitemstock if it exists, so there won't be an unnecessary query to database
     to get the warehouseitemstock"""
 
-    warehouse = serializers.IntegerField(write_only=True)
+    warehouse = serializers.IntegerField(write_only=True, required=False)
     id = serializers.IntegerField()
 
     class Meta:
@@ -225,6 +219,7 @@ class ItemNestedSerializer(UniqueFieldsMixin, ModelSerializer):
             "description",
             "stock_unit",
             "barcode",
+            "kdv",
             "stocks",
             "stock_code",
             "buyprice",
@@ -292,9 +287,11 @@ class StockMovementNestedSerializer(ModelSerializer):
                     warehouse=warehouse_item_stock_data["warehouse"],
                 ).id
         except models.WarehouseItemStock.DoesNotExist:
-            warehouse_item_stock_id = WarehouseItemStockNestedSerializer().create(
-                warehouse_item_stock_data
-            ).id
+            warehouse_item_stock_id = (
+                WarehouseItemStockNestedSerializer()
+                .create(warehouse_item_stock_data)
+                .id
+            )
 
         stock_movement = models.StockMovement(
             **validated_data, warehouse_item_stock_id=warehouse_item_stock_id
@@ -305,6 +302,27 @@ class StockMovementNestedSerializer(ModelSerializer):
         # )
 
     def update(self, instance: models.StockMovement, validated_data: OrderedDict):
+        warehouse_item_stock_data: OrderedDict[
+            str, OrderedDict | Any
+        ] = validated_data.get("warehouse_item_stock")
+        if (
+            instance.warehouse_item_stock.warehouse_id
+            != warehouse_item_stock_data["warehouse"].id
+        ):
+            (
+                warehouse_item_stock,
+                created,
+            ) = models.WarehouseItemStock.objects.get_or_create(
+                item_id=warehouse_item_stock_data["item"]["id"],
+                warehouse=warehouse_item_stock_data["warehouse"],
+            )
+            instance.warehouse_item_stock.amount_db = None
+            instance.warehouse_item_stock.save()
+            instance.warehouse_item_stock = warehouse_item_stock
+
+        instance.warehouse_item_stock.amount_db = None
+        instance.amount = validated_data["amount"]
+        return instance
         # we don't really want to update WarehouseItemStock like this. so just pop it.
         validated_data.pop("warehouse_item_stock")
         return super().update(instance, validated_data)
@@ -312,6 +330,23 @@ class StockMovementNestedSerializer(ModelSerializer):
     class Meta:
         model = models.StockMovement
         fields = ["warehouse_item_stock", "amount", "related_movement"]
+
+
+class WarehouseItemStockInfoSerializer(DynamicFieldsModelSerializer):
+    item = ItemOutSerializer(
+        excluded_fields=[
+            "stocks",
+            "created_by",
+            "updated_by",
+            "created_at",
+            "updated_at",
+        ]
+    )
+    warehouse = WarehouseSerializer()
+
+    class Meta:
+        model = models.WarehouseItemStock
+        fields = ["item", "warehouse", "amount_db"]
 
 
 # TODO: Merge Items that may be duplicate with a view

@@ -6,6 +6,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from inventory import models
 from inventory import serializers as inventory_serializers
+from invoice import serializers as invoice_serializers
 from utilities.filters import DjangoFilterBackend, OrderingFilter, SearchFilter
 
 
@@ -65,7 +66,10 @@ class ItemViewset(ModelViewSet):
                 "component": "multi-category-selector",
                 "props": {"label": "Kategoriler"},
             },
-            "isnull": {"component": "checkbox", "props": {"label": "Kategorisiz"}},
+            "isnull": {
+                "component": "checkbox",
+                "props": {"label": "Kategorisiz", "toggleIndeterminate": True},
+            },
         },
         "buyprice": {
             "range": {"component": "money-range", "props": {"label": "Alış Fiyatı"}}
@@ -97,9 +101,20 @@ class ItemViewset(ModelViewSet):
                 "props": {"label": "Güncelleyen kullanıcı"},
             }
         },
+        "inactivated": {
+            "exact": {
+                "component": "checkbox",
+                "props": {
+                    "label": "Gizlenmiş Öğeleri Göster",
+                    "toggleIndeterminate": True,
+                },
+            }
+        },
     }
     search_fields = ["name", "description"]
 
+    @method_decorator(cache_page(1))
+    @method_decorator(vary_on_headers("Authorization"))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -112,6 +127,24 @@ class ItemViewset(ModelViewSet):
             return inventory_serializers.ItemInSerializer
 
 
+class ItemHistoryViewset(ItemViewset):
+    queryset = models.Item.history.select_related(
+        "created_by", "updated_by", "category", "stock_unit"
+    ).all()
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    ordering_fields = [
+        "id",
+        "name",
+        "created_at",
+        "updated_at",
+        "buyprice",
+        "sellprice",
+        "category",
+    ]
+    ordering = ["-id"]
+    search_fields = ["name", "description"]
+
+
 class WarehouseViewset(ModelViewSet):
     filter_backends = [SearchFilter]
     queryset = models.Warehouse.objects.all()
@@ -121,14 +154,55 @@ class WarehouseViewset(ModelViewSet):
 
 class WarehouseItemStockViewset(ReadOnlyModelViewSet):
     queryset = models.WarehouseItemStock.objects.all()
-    serializer_class = inventory_serializers.WarehouseItemStockSerializer
+    serializer_class = inventory_serializers.WarehouseItemStockInfoSerializer
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ["item__name"]
     # filterset_fields = ['warehouse', 'item']
 
 
-class StockMovementViewset(ModelViewSet):
-    queryset = models.StockMovement.objects.all()
-    serializer_class = inventory_serializers.StockMovementSerializer
-    filter_backends = [SearchFilter]
-    search_fields = ["warehouse_item_stock__item__name", "amount"]
+class StockMovementWithoutItemViewset(ModelViewSet):
+    queryset = models.StockMovement.objects.select_related(
+        "invoice_item__invoice__stakeholder",
+        "invoice_item__invoice__created_by",
+        "warehouse_item_stock__warehouse",
+    ).all()
+    serializer_class = invoice_serializers.StockMovementWithoutItemSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    search_fields = ["warehouse_item_stock__item__name"]
+    ordering_fields = [
+        "id",
+        "created_at",
+        "updated_at",
+        "created_by",
+        "updated_by",
+    ]
+    ordering = ["-id"]
+    filterset_fields = {
+        "created_at": {
+            "range": {
+                "component": "date-time-range",
+                "props": {"label": "Oluşturma tarihi"},
+            }
+        },
+        "updated_at": {
+            "range": {
+                "component": "date-time-range",
+                "props": {"label": "Güncellenme tarihi"},
+            }
+        },
+        "created_by": {
+            "exact": {
+                "component": "user-select",
+                "props": {"label": "Oluşturan kullanıcı"},
+            }
+        },
+        "updated_by": {
+            "exact": {
+                "component": "user-select",
+                "props": {"label": "Güncelleyen kullanıcı"},
+            }
+        },
+        "warehouse_item_stock__item__id": {
+            "exact": {"component": "item-select", "props": {"label": "item"}}
+        },
+    }

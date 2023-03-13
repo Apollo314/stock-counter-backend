@@ -8,41 +8,70 @@ from rest_framework.exceptions import ValidationError
 from inventory.models import WarehouseItemStock
 
 from inventory.serializers import (
-    StockMovementNestedSerializer as StockMovementNestedSerializer,
+    StockMovementNestedSerializer,
+    WarehouseItemStockInfoSerializer,
 )
 from inventory.serializers import (
     WarehouseItemStockNestedSerializer,
     WarehouseSerializer,
 )
 from invoice import models
-from stakeholder.serializers import StakeholderSerializer
+from invoice.serializer_helpers import calculate_total
+from stakeholder.serializers import StakeholderBasicSerializer, StakeholderSerializer
+from users.serializers import ConciseUserSerializer, UserSerializer
 from utilities.enums import InvoiceType
-from utilities.serializers import CreateListSerializer, ModelSerializer
-from utilities.serialzier_helpers import CurrentUserDefault
+from utilities.serializers import (
+    CreateListSerializer,
+    DynamicFieldsModelSerializer,
+    ModelSerializer,
+)
+from utilities.serializer_helpers import CurrentUserDefault
 
 from utilities.caches import generate_cache_name, cache
 
 
 class InvoiceItemListSerializer(serializers.ListSerializer):
     def create(self, validated_data):
-        invoice_items = [self.child.create(attrs) for attrs in validated_data]
+        invoice_items = [self.child.create(vd) for vd in validated_data]
         try:
             stock_movements = [item.stock_movement for item in invoice_items]
             models.StockMovement.objects.bulk_create(stock_movements)
-
-            warehouse_item_stock_cache_names = [
-                generate_cache_name(
-                    WarehouseItemStock, "amount", sm.warehouse_item_stock_id
-                )
+            fake_warehouse_item_stocks = [
+                WarehouseItemStock(id=sm.warehouse_item_stock_id, amount_db=None)
                 for sm in stock_movements
             ]
-            cache.delete_many(warehouse_item_stock_cache_names)
+            WarehouseItemStock.objects.bulk_update(
+                fake_warehouse_item_stocks, ["amount_db"]
+            )
+            # warehouse_item_stock_cache_names = [
+            #     generate_cache_name(
+            #         WarehouseItemStock, "amount", sm.warehouse_item_stock_id
+            #     )
+            #     for sm in stock_movements
+            # ]
+            # cache.delete_many(warehouse_item_stock_cache_names)
             models.InvoiceItem.objects.bulk_create(invoice_items)
 
         except IntegrityError as e:
             raise ValidationError(e)
 
         return invoice_items
+
+    def update(self, invoice_items, validated_data):
+        invoice_items = [
+            self.child.update(ii, vd) for (vd, ii) in zip(validated_data, invoice_items)
+        ]
+        try:
+            stock_movements = [item.stock_movement for item in invoice_items]
+            warehouse_item_stocks = [sm.warehouse_item_stock for sm in stock_movements]
+
+            models.StockMovement.objects.bulk_update(
+                stock_movements, {"amount", "related_movement", "warehouse_item_stock"}
+            )
+            WarehouseItemStock.objects.bulk_update(warehouse_item_stocks, {"amount_db"})
+        except IntegrityError as e:
+            raise ValidationError(e)
+        # return super().update(instance, validated_data)
 
 
 class InvoiceItemSerializer(ModelSerializer):
@@ -66,11 +95,18 @@ class InvoiceItemSerializer(ModelSerializer):
         return instance
 
     def update(self, instance: models.InvoiceItem, validated_data: OrderedDict):
-        stock_movement_data = validated_data.pop("stock_movement")
-        StockMovementNestedSerializer().update(
+        stock_movement_data = validated_data.get("stock_movement")
+        stock_movement: models.StockMovement = StockMovementNestedSerializer().update(
             instance.stock_movement, stock_movement_data
         )
-        return super().update(instance, validated_data)
+        instance.stock_movement = stock_movement
+        return instance
+
+    # stock_movement_data = validated_data.pop("stock_movement")
+    # StockMovementNestedSerializer().update(
+    #     instance.stock_movement, stock_movement_data
+    # )
+    # return super().update(instance, validated_data)
 
     class Meta:
         model = models.InvoiceItem
@@ -82,7 +118,7 @@ class InvoiceListSerializer(ModelSerializer):
     """For listview only"""
 
     warehouse = WarehouseSerializer()
-    stakeholder = StakeholderSerializer()
+    stakeholder = StakeholderBasicSerializer()
 
     class Meta:
         model = models.Invoice
@@ -104,7 +140,7 @@ class InvoiceListSerializer(ModelSerializer):
         ]
 
 
-class InvoiceDetailInSerializer(ModelSerializer):
+class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
     negate_map = {
         InvoiceType.purchase: False,
         InvoiceType.sale: True,
@@ -113,16 +149,16 @@ class InvoiceDetailInSerializer(ModelSerializer):
     }
     created_by = serializers.HiddenField(default=CurrentUserDefault())
     updated_by = serializers.HiddenField(default=CurrentUserDefault())
+    items = InvoiceItemSerializer(many=True, write_only=True)
+    related_invoice = InvoiceListSerializer(required=False, many=True)
 
     def signed_amount(self, amount: Decimal, invoice_type: InvoiceType):
         if self.negate_map[invoice_type]:
             return -abs(amount)
         return amount
 
-    items = InvoiceItemSerializer(many=True, write_only=True)
-    related_invoice = InvoiceListSerializer(required=False, many=True)
-
     def create(self, validated_data: OrderedDict):
+        validated_data = calculate_total(validated_data)
         items_data = validated_data.pop("items")
         invoice: models.Invoice = super().create(validated_data)
         warehouse = validated_data.get("warehouse")
@@ -135,18 +171,57 @@ class InvoiceDetailInSerializer(ModelSerializer):
         InvoiceItemSerializer(many=True).create(items_data)
         return invoice
 
-    def update(self, instance: models.Invoice, validated_data: OrderedDict):
+    def update(self, invoice: models.Invoice, validated_data: OrderedDict):
+        validated_data = calculate_total(validated_data)
         items_data: list[OrderedDict] = validated_data.pop("items")
-        items_map = {item.id: item for item in instance.items.all()}
+        warehouse = validated_data.get("warehouse")
+
+        updated_items = []
+        created_items = []
+
         for item in items_data:
+            item["invoice_id"] = invoice.id  # just in case there is a new item
             item["stock_movement"]["amount"] = self.signed_amount(
                 item["stock_movement"]["amount"], validated_data["invoice_type"]
             )
+            # in case there is something new or warehouse has changed
+            item["stock_movement"]["warehouse_item_stock"]["warehouse"] = warehouse
             if item.get("id"):
-                InvoiceItemSerializer().update(items_map[item["id"]], item)
+                updated_items.append(item)
             else:
-                InvoiceItemSerializer().create(items_data)
-        return super().update(instance, validated_data)
+                created_items.append(item)
+
+        if len(created_items):
+            InvoiceItemSerializer(many=True).create(created_items)
+
+        if len(updated_items):
+            InvoiceItemSerializer(many=True).update(
+                invoice.items.select_related(
+                    "stock_movement__warehouse_item_stock"
+                ).all(),
+                updated_items,
+            )
+
+        invoice.warehouse = warehouse
+        return super().update(invoice, validated_data)
+
+        # all_items = instance.items.all()
+
+        # items_to_create = [item for item in all_items if not hasattr(item, "id")]
+        # items_to_update = [item for item in all_items if hasattr(item, "id")]
+
+        # return invoice
+        # items_data: list[OrderedDict] = validated_data.pop("items")
+        # items_map = {item.id: item for item in instance.items.all()}
+        # for item in items_data:
+        #     item["stock_movement"]["amount"] = self.signed_amount(
+        #         item["stock_movement"]["amount"], validated_data["invoice_type"]
+        #     )
+        #     if item.get("id"):
+        #         InvoiceItemSerializer().update(items_map[item["id"]], item)
+        #     else:
+        #         InvoiceItemSerializer().create(items_data)
+        # return super().update(instance, validated_data)
 
     class Meta:
         model = models.Invoice
@@ -163,6 +238,8 @@ class InvoiceDetailInSerializer(ModelSerializer):
             "warehouse",
             "created_by",
             "updated_by",
+            "total",
+            "total_with_tax",
             "items",
             "related_invoice",
         ]
@@ -172,3 +249,33 @@ class InvoiceDetailOutSerializer(InvoiceDetailInSerializer):
     warehouse = WarehouseSerializer()
     stakeholder = StakeholderSerializer()
     items = InvoiceItemSerializer(many=True)
+
+
+class InvoiceDetailOutForInvoiceItemSerializer(InvoiceDetailInSerializer):
+    stakeholder = StakeholderBasicSerializer()
+    created_by = ConciseUserSerializer()
+
+
+class InvoiceItemWithDetailedInvoiceSerializer(ModelSerializer):
+    invoice = InvoiceDetailOutForInvoiceItemSerializer(
+        excluded_fields=[
+            "updated_by",
+            "invoice_conditions",
+            "warehouse",
+            "items",
+            "related_invoice",
+        ]
+    )
+
+    class Meta:
+        model = models.InvoiceItem
+        fields = ["invoice", "price"]
+
+
+class StockMovementWithoutItemSerializer(ModelSerializer):
+    warehouse_item_stock = WarehouseItemStockInfoSerializer(excluded_fields=["item"])
+    invoice_item = InvoiceItemWithDetailedInvoiceSerializer()
+
+    class Meta:
+        model = models.StockMovement
+        fields = ["id", "warehouse_item_stock", "amount", "invoice_item"]
