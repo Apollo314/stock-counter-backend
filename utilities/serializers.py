@@ -1,4 +1,4 @@
-# so apparently modelserializers just don't care about model field defaults
+# so apparently modelserializers just don't care about model field defaults in openapi documentation
 # not anymore.
 # good to have for autoform generation.
 

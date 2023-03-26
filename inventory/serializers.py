@@ -127,7 +127,7 @@ class ItemInSerializer(DynamicFieldsModelSerializer):
 
 class ItemOutSerializer(ItemInSerializer):
     stock_unit = StockUnitSerializer()
-    category = CategorySerializer()
+    category = CategorySerializer(required=False)
     created_by = ConciseUserSerializer()
     updated_by = ConciseUserSerializer()
 
