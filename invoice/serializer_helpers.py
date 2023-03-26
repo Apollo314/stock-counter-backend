@@ -31,24 +31,30 @@ class InvoiceDict(TypedDict):
 
 
 def calculate_total(invoice: InvoiceDict):
-    cer = invoice.get("currency_exchange_rate", 1)
-    invoice["total_with_tax"] = sum(
-        (
-            item["price"]
-            * item["stock_movement"]["amount"]
-            * cer
-            * (
-                1
-                + Decimal(item["stock_movement"]["warehouse_item_stock"]["item"]["kdv"])
-                / 100
+    """calculates the total of the invoice in terms of the currency of the invoice.
+    ex: 1300 (USD) instead of 13000 (TRY)"""
+    invoice["total_with_tax"] = Decimal(
+        sum(
+            (
+                item["price"]
+                * item["stock_movement"]["amount"]
+                * (
+                    1
+                    + Decimal(
+                        item["stock_movement"]["warehouse_item_stock"]["item"]["kdv"]
+                    )
+                    / 100
+                )
+                for item in invoice["items"]
             )
-            for item in invoice["items"]
         )
     )
-    invoice["total"] = sum(
-        (
-            item["price"] * item["stock_movement"]["amount"] * cer
-            for item in invoice["items"]
+    invoice["total"] = Decimal(
+        sum(
+            (
+                item["price"] * item["stock_movement"]["amount"]
+                for item in invoice["items"]
+            )
         )
     )
 

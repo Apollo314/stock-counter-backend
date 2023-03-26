@@ -25,6 +25,7 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 DEBUG = os.environ["DEBUG"] == "True"
 ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split()
 CORS_ALLOWED_ORIGINS = os.environ["CORS_ALLOWED_ORIGINS"].split()
+CORS_ALLOW_CREDENTIALS = True
 # CORS_ALLOW_ALL_ORIGINS = True
 
 
@@ -168,9 +169,10 @@ REST_FRAMEWORK = {
         # "rest_framework.parsers.JSONParser",
     ),
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "knox.auth.TokenAuthentication",
+        "users.authentication.TokenCookieAuthentication",
+        # "knox.auth.TokenAuthentication",
         # "rest_framework.authentication.BasicAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        # "rest_framework.authentication.SessionAuthentication",
         # 'rest_framework.authentication.TokenAuthentication',
     ],
     "DEFAULT_PERMISSION_CLASSES": [

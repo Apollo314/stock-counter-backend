@@ -47,10 +47,13 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pyright]
 strict = false
+typeCheckingMode = "off"
 exclude = ["**/node_modules",
     "**/__pycache__",
     "src/experimental",
     "src/typestubs"
 ]
-venvPath = "C:/Users/Apollo/AppData/Local/Packages/PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0/LocalCache/Local/pypoetry/Cache/virtualenvs"
-venv = "goktugv2-4yG3oDP2-py3.11"
+#venvPath = "C:/Users/Apollo/AppData/Local/Packages/PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0/LocalCache/Local/pypoetry/Cache/virtualenvs"
+venvPath = "/home/apollo/.cache/pypoetry/virtualenvs"
+#venv = "goktugv2-4yG3oDP2-py3.11"
+venv = "goktugv2-80JKcZd0-py3.10"

@@ -1,11 +1,14 @@
 from django.contrib.auth import login
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.db.models import Q, QuerySet
+from django.http import HttpRequest
 from django.utils import timezone
 from knox.auth import TokenAuthentication
 from knox.models import AuthToken
+from knox.settings import knox_settings
 from knox.views import LoginView as KnoxLoginView
 from rest_framework import permissions, status
+from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -28,15 +31,15 @@ class LoginView(KnoxLoginView):
     def get_user_serializer_class(self):
         return UserSerializer
 
-    def post(self, request, format=None):
+    def post(self, request: HttpRequest, format=None):
         serializer = LoginSerializer(data=request.data)
         token_limit_per_user = self.get_token_limit_per_user()
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
-        login(request, user)
+        # login(request, user)
         if token_limit_per_user is not None:
             now = timezone.now()
-            token: QuerySet[AuthToken] = request.user.auth_token_set.filter(
+            token: QuerySet[AuthToken] = user.auth_token_set.filter(
                 Q(expiry__gt=now) | Q(expiry__isnull=True)
             )
             if token.count() >= token_limit_per_user:
@@ -44,12 +47,18 @@ class LoginView(KnoxLoginView):
                 oldest_valid_token = token.order_by("created").first()
                 oldest_valid_token.delete()
         token_ttl = self.get_token_ttl()
-        instance, token = AuthToken.objects.create(request.user, token_ttl)
-        user_logged_in.send(
-            sender=request.user.__class__, request=request, user=request.user
+        _, token = AuthToken.objects.create(user, token_ttl)
+        user_logged_in.send(sender=user.__class__, request=request, user=user)
+        res = Response(serializer.data)
+        res.set_cookie(
+            knox_settings.AUTH_HEADER_PREFIX,
+            token,
+            # samesite="None",
+            # secure=True,
+            max_age=1000000,
+            httponly=True,
         )
-        data = self.get_post_response_data(request, token, instance)
-        return Response(data)
+        return res
 
 
 class LogoutView(GenericAPIView):
