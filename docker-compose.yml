@@ -1,5 +1,5 @@
 version: "3.4"
-   
+
 # networks:
 #   lan_access:
 #     driver: bridge
@@ -17,21 +17,22 @@ services:
     ports:
       - 6379:6379
     env_file:
-      - .env.prod
+      - .env
   db:
-    # image: postgres
-    build: 
+    build:
       context: .
-      dockerfile: ./Dockerfile_forpostgres
+      dockerfile: ./postgres.Dockerfile
     restart: always
     ports:
       - "5432:5432"
     volumes:
       - db:/var/lib/postgresql/data
     env_file:
-      - .env.prod
+      - .env
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: ./django.Dockerfile
     # restart: always
     # command: python manage.py runserver 0.0.0.0:8000
     # command: uvicorn goktugv2.asgi:application --host 0.0.0.0 --port 8000
@@ -43,9 +44,8 @@ services:
     depends_on:
       - db
     env_file:
-      - .env.prod
+      - .env
 
 volumes:
   db:
-    driver: local
   redisdata:

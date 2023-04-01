@@ -97,9 +97,9 @@ DATABASES = {
     # }
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ["DB_NAME"],
-        "USER": os.environ["DB_USER"],
-        "PASSWORD": os.environ["DB_PASSWORD"],
+        "NAME": os.environ["POSTGRES_DB"],
+        "USER": os.environ["POSTGRES_USER"],
+        "PASSWORD": os.environ["POSTGRES_PASSWORD"],
         "HOST": os.environ["DB_HOST"],
         "PORT": os.environ["DB_PORT"],
     }
@@ -224,29 +224,29 @@ CACHES = {
 }
 
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    # "filters": {
-    #     "require_debug_true": {
-    #         "()": "django.utils.log.RequireDebugTrue",
-    #     }
-    # },
-    "handlers": {
-        "console": {
-            "level": "DEBUG",
-            # "filters": ["require_debug_true"],
-            "class": "logging.StreamHandler",
-        }
-    },
-    "loggers": {
-        "django.db.backends": {
-            "level": "DEBUG",
-            "handlers": ["console"],
-        },
-        # 'django': {
-        #     'handlers': ['console'],
-        #     'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
-        # }
-    },
-}
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     # "filters": {
+#     #     "require_debug_true": {
+#     #         "()": "django.utils.log.RequireDebugTrue",
+#     #     }
+#     # },
+#     "handlers": {
+#         "console": {
+#             "level": "DEBUG",
+#             # "filters": ["require_debug_true"],
+#             "class": "logging.StreamHandler",
+#         }
+#     },
+#     "loggers": {
+#         "django.db.backends": {
+#             "level": "DEBUG",
+#             "handlers": ["console"],
+#         },
+#         # 'django': {
+#         #     'handlers': ['console'],
+#         #     'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+#         # }
+#     },
+# }

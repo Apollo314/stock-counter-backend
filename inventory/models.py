@@ -37,6 +37,10 @@ class StockUnit(models.Model):
         return self.name
 
 
+class Tax(models.Model):
+    name: str = models.CharField("db.inventory.tax.name", max_length=40, unique=True)
+
+
 def get_item_image_location(instance: "Item", filename: str):
     f = Path(filename)
     path = Path("item_images") / f"{instance.name}_{instance.id}{f.suffix}"
@@ -141,20 +145,17 @@ class WarehouseItemStock(models.Model):
         related_name="stocks",
     )  # probably dangerous if it was CASCADE
     amount_db: models.DecimalField = models.DecimalField(
-        "Miktar",
-        max_digits=19,
-        decimal_places=4,
-        default=None,
-        null=True,
-        blank=True
+        "Miktar", max_digits=19, decimal_places=4, default=None, null=True, blank=True
     )
-    
+
     @staticmethod
     def update_stocks(ids: list[int]):
         warehouse_item_stocks = WarehouseItemStock.objects.filter(ids)
         for wis in warehouse_item_stocks:
             wis.amount_db = None
-        WarehouseItemStock.objects.bulk_update(warehouse_item_stocks, fields=['amount_db'])
+        WarehouseItemStock.objects.bulk_update(
+            warehouse_item_stocks, fields=["amount_db"]
+        )
 
     def calculate_stock(self) -> Decimal:
         stock_movements = self.stockmovement_set.all()
