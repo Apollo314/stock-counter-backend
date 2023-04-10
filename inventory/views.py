@@ -64,48 +64,62 @@ class ItemViewset(ModelViewSet):
         "category": {
             "in": {
                 "component": "multi-category-selector",
-                "props": {"label": "Kategoriler"},
+                "props": {"label": "category"},
             },
             "isnull": {
                 "component": "checkbox",
-                "props": {"label": "Kategorisiz", "toggleIndeterminate": True},
+                "props": {
+                    "true_label": "only_categoryless",
+                    "false_label": "only_categorized",
+                    "indetermined_label": "with_or_without_cateogory",
+                    "toggleIndeterminate": True,
+                },
             },
         },
         "buyprice": {
-            "range": {"component": "money-range", "props": {"label": "Alış Fiyatı"}}
+            "range": {"component": "money-range", "props": {"label": "buyprice"}}
         },
         "sellprice": {
-            "range": {"component": "money-range", "props": {"label": "Satış Fiyatı"}}
+            "range": {"component": "money-range", "props": {"label": "sellprice"}}
+        },
+        "barcode": {
+            "exact": {"component": "text-input", "props": {"label": "barcode"}}
+        },
+        "stock_unit": {
+            "in": {
+                "component": "multi-stockunit-selector",
+                "props": {"label": "stockunit"},
+            }
         },
         "created_at": {
             "range": {
                 "component": "date-time-range",
-                "props": {"label": "Oluşturma tarihi"},
+                "props": {"label": "created_at"},
             }
         },
         "updated_at": {
             "range": {
                 "component": "date-time-range",
-                "props": {"label": "Güncellenme tarihi"},
+                "props": {"label": "updated_at"},
             }
         },
         "created_by": {
             "exact": {
                 "component": "user-select",
-                "props": {"label": "Oluşturan kullanıcı"},
+                "props": {"label": "created_by"},
             }
         },
         "updated_by": {
             "exact": {
                 "component": "user-select",
-                "props": {"label": "Güncelleyen kullanıcı"},
+                "props": {"label": "updated_by"},
             }
         },
         "inactivated": {
             "exact": {
                 "component": "checkbox",
                 "props": {
-                    "label": "Gizlenmiş Öğeleri Göster",
+                    "label": "inactivated",
                     "toggleIndeterminate": True,
                 },
             }

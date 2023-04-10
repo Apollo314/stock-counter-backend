@@ -197,7 +197,8 @@ SPECTACULAR_SETTINGS = {
         "docExpansion": None,
     },
     "ENFORCE_NON_BLANK_FIELDS": True,
-    "TITLE": "drf"
+    "TITLE": "drf",
+    "SORT_OPERATION_PARAMETERS": False
     # "REDOC_DIST": "https://cdn.jsdelivr.net/npm/redoc@latest",
 }
 

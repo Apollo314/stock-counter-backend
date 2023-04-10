@@ -7,23 +7,24 @@ from rest_framework import serializers
 
 from inventory import models
 from users.serializers import ConciseUserSerializer, UserSerializer
-from utilities.serializermixins import UniqueFieldsMixin
-from utilities.serializers import (
-    DynamicFieldsModelSerializer,
-    ModelSerializer,
-    UpdateListSerializer,
-)
 from utilities.serializer_helpers import CurrentUserDefault
+from utilities.serializermixins import UniqueFieldsMixin
+from utilities.serializers import (DynamicFieldsModelSerializer,
+                                   ModelSerializer, UpdateListSerializer)
 
 
-@extend_schema_serializer(
-    extensions={
-        "x-components": {
-            "parent": {"component": "category-selector"},
-        }
-    }
-)
+# @extend_schema_serializer(
+#     extensions={
+#         "x-components": {
+#             "parent": {"component": "category-selector"},
+#         }
+#     }
+# )
 class CategorySerializer(ModelSerializer):
+    field_overrides = {
+        "parent": {"component": "category-selector"},
+    }
+
     def validate_name(self, value):
         if not self.instance:
             qs = self.Meta.model._default_manager.filter(name__iexact=value)
@@ -81,23 +82,19 @@ class WarehouseItemStockSerializer(ModelSerializer):
         fields = ["id", "item", "warehouse", "amount"]
 
 
-@extend_schema_serializer(
-    extensions={
-        "x-components": {
-            "stock_unit": {"component": "unit-selector"},
-            "barcode": {"component": "barcode-scanner"},
-            "thumbnail": {"component": "single-image-selector"},
-            "category": {"component": "category-selector"},
-            "buyprice": {"component": "money-input"},
-            "sellprice": {"component": "money-input"},
-        }
-    }
-)
 class ItemInSerializer(DynamicFieldsModelSerializer):
     # """For list actions like bulk update bulk delete..."""
     stocks = WarehouseItemStockSerializer(many=True, read_only=True)
     created_by = serializers.HiddenField(default=CurrentUserDefault())
     updated_by = serializers.HiddenField(default=CurrentUserDefault())
+    field_overrides = {
+        "stock_unit": {"component": "unit-selector"},
+        "barcode": {"component": "barcode-scanner"},
+        "thumbnail": {"component": "single-image-selector"},
+        "category": {"component": "category-selector"},
+        "buyprice": {"component": "money-input"},
+        "sellprice": {"component": "money-input"},
+    }
 
     class Meta:
         model = models.Item
@@ -184,10 +181,6 @@ class StockUnitNestedSerializer(UniqueFieldsMixin, ModelSerializer):
 
 
 class WarehouseItemStockINFO_ONLYSerializer(ModelSerializer):
-    """this exists so that warehouseitemstock is available in ItemNestedSerializer has access
-    to warehouseitemstock if it exists, so there won't be an unnecessary query to database
-    to get the warehouseitemstock"""
-
     warehouse = serializers.IntegerField(write_only=True, required=False)
     id = serializers.IntegerField()
 

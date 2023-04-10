@@ -1,5 +1,7 @@
-from drf_spectacular.extensions import OpenApiFilterExtension
+from drf_spectacular.extensions import (OpenApiFilterExtension,
+                                        OpenApiSerializerFieldExtension)
 from drf_spectacular.openapi import AutoSchema as AutoSchema_
+from drf_spectacular.plumbing import ResolvedComponent
 
 
 def build_media_type_object(schema, examples=None):
@@ -19,6 +21,21 @@ class AutoSchema(AutoSchema_):
     #   return ['/'.join(tokenized_path)]
 
     # for custom field
+
+    def resolve_serializer(
+        self, serializer, direction, bypass_extensions=False
+    ) -> ResolvedComponent:
+        result = super().resolve_serializer(serializer, direction, bypass_extensions)
+        if hasattr(serializer, "field_overrides"):
+            field_overrides = serializer.field_overrides
+            for key, override in field_overrides.items():
+                try:
+                    result.schema["properties"][key]["x-components"] = override
+                except:
+                    print("oh well")
+            return result
+        return result
+
     def _get_filters(self) -> dict:
         filters = dict()
         for filter_backend in self.get_filter_backends():

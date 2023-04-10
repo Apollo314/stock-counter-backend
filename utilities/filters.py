@@ -1,10 +1,11 @@
+from datetime import datetime
+
+from django.db import models
+from django_filters import DateFromToRangeFilter, fields, filters, filterset
 from django_filters.rest_framework import DjangoFilterBackend as _DjangoFilterBackend
 from drf_spectacular.plumbing import follow_model_field_lookup
 from rest_framework.filters import OrderingFilter as _OrderingFilter
 from rest_framework.filters import SearchFilter as _SearchFilter
-from django_filters import fields, filterset, DateFromToRangeFilter, filters
-from django.db import models
-from datetime import datetime
 
 
 class OrderingFilter(_OrderingFilter):
@@ -121,8 +122,8 @@ class DjangoFilterBackend(_DjangoFilterBackend):
                 "description": field.label if field.label is not None else field_name,
                 "schema": {
                     "type": "string",
+                    "x-components": filterset_fields[key][lookup],
                 },
-                "x-component": filterset_fields[key][lookup],
             }
             if field.extra and "choices" in field.extra:
                 parameter["schema"]["enum"] = [c[0] for c in field.extra["choices"]]
