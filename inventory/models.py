@@ -75,14 +75,14 @@ class Item(CreateUpdateInfo, InactivatedMixin):
         default=Currency.turkish_lira,
         blank=False,
     )
-    barcode: str = models.CharField("Barkod", max_length=20, null=True, blank=True)
+    barcode: str = models.CharField("Barkod", max_length=20, null=True, blank=True, unique=True)
     stock_code: str = models.CharField(
         "Stok Kodu", max_length=40, null=True, blank=True
     )
     kdv: KDV = models.IntegerField("Katma Değer Vergisi", choices=KDV.choices)
 
     thumbnail: models.ImageField = models.ImageField(
-        "Önizleme Fotoğraf", upload_to=get_item_image_location, null=True, blank=True
+        "thumbnail", upload_to=get_item_image_location, null=True, blank=True
     )
 
     category: Category = models.ForeignKey(

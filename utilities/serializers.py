@@ -4,12 +4,11 @@
 
 # also if blank=False, field should be required
 
+from django.db import IntegrityError, models
+from drf_extra_fields import fields
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ListSerializer
 from rest_framework.serializers import ModelSerializer as ModelSerializer_
-
-from django.db import models, IntegrityError
-from drf_extra_fields import fields
 
 serializer_field_mapping_override = {
     models.ImageField: fields.Base64ImageField,
@@ -57,7 +56,6 @@ class DynamicFieldsModelSerializer(ModelSerializer):
         excluded_fields: list["str"] | None = None,
         **kwargs
     ):
-
         # Instantiate the superclass normally
         super().__init__(*args, **kwargs)
 
@@ -80,7 +78,7 @@ class UpdateListSerializer(ListSerializer):
             raise ValidationError({"message": "Amount of instances doesn't match data"})
 
         update_fields = []
-        for (instance, validated_data) in zip(instances, validated_data_list):
+        for instance, validated_data in zip(instances, validated_data_list):
             for attr, value in validated_data.items():
                 setattr(instance, attr, value)
                 if attr not in update_fields:
