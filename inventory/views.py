@@ -83,7 +83,7 @@ class ItemViewset(ModelViewSet):
             "range": {"component": "money-range", "props": {"label": "sellprice"}}
         },
         "barcode": {
-            "exact": {"component": "text-input", "props": {"label": "barcode"}}
+            "exact": {"component": "barcode-scanner", "props": {"label": "barcode"}}
         },
         "stock_unit": {
             "in": {
