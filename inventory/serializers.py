@@ -1,7 +1,6 @@
 from decimal import Decimal
 from typing import Any, OrderedDict
 
-from drf_extra_fields.fields import Base64ImageField
 from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
