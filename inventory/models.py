@@ -19,7 +19,7 @@ from utilities.validators import not_zero_validator
 
 
 class Category(models.Model):
-    name: str = models.CharField(_("Kategori"), unique=True, max_length=40)
+    name: str = models.CharField(_("Category"), unique=True, max_length=40)
     parent: "Category" = models.ForeignKey(
         "self",
         verbose_name=("Üst Kategori"),
@@ -31,12 +31,13 @@ class Category(models.Model):
 
 
 class StockUnit(models.Model):
-    name: str = models.CharField("Birim", unique=True, max_length=20)
+    name: str = models.CharField(_("Stock unit"), unique=True, max_length=20)
 
     def __str__(self):
         return self.name
 
 
+# TODO: implement arbitrary tax instead of just kdv, since that is what governments do.
 class Tax(models.Model):
     name: str = models.CharField("db.inventory.tax.name", max_length=40, unique=True)
 
@@ -48,17 +49,17 @@ def get_item_image_location(instance: "Item", filename: str):
 
 
 class Item(CreateUpdateInfo, InactivatedMixin):
-    name: str = models.CharField("Ürün/Hizmet", max_length=200, unique=True)
+    name: str = models.CharField(_("Item/Service"), max_length=200, unique=True)
     description: str = models.CharField(
-        "Açıklama", max_length=2000, null=True, blank=True
+        _("Description"), max_length=2000, null=True, blank=True
     )
 
     # buyprice including taxes.
     buyprice: Decimal = models.DecimalField(
-        "Alış Fiyatı", max_digits=19, decimal_places=4
+        _("Buy price"), max_digits=19, decimal_places=4
     )
     buycurrency: Currency = models.CharField(
-        "Alış Para Birimi",
+        _("Buy currency"),
         max_length=4,
         choices=Currency.choices,
         default=Currency.turkish_lira,
@@ -66,35 +67,37 @@ class Item(CreateUpdateInfo, InactivatedMixin):
 
     # sellprice including taxes.
     sellprice: Decimal = models.DecimalField(
-        "Satış Fiyatı", max_digits=19, decimal_places=4
+        _("Sell price"), max_digits=19, decimal_places=4
     )
     sellcurrency: Currency = models.CharField(
-        "Satış Para Birimi",
+        _("Sell currency"),
         max_length=4,
         choices=Currency.choices,
         default=Currency.turkish_lira,
         blank=False,
     )
-    barcode: str = models.CharField("Barkod", max_length=20, null=True, blank=True, unique=True)
+    barcode: str = models.CharField(
+        _("Barcode"), max_length=20, null=True, blank=True, unique=True
+    )
     stock_code: str = models.CharField(
-        "Stok Kodu", max_length=40, null=True, blank=True
+        _("Stock code"), max_length=40, null=True, blank=True
     )
     kdv: KDV = models.IntegerField("Katma Değer Vergisi", choices=KDV.choices)
 
     thumbnail: models.ImageField = models.ImageField(
-        "thumbnail", upload_to=get_item_image_location, null=True, blank=True
+        _("Thumbnail"), upload_to=get_item_image_location, null=True, blank=True
     )
 
     category: Category = models.ForeignKey(
         Category,
-        verbose_name="Kategori",
+        verbose_name=_("Category"),
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
     stock_unit: StockUnit = models.ForeignKey(
         StockUnit,
-        verbose_name="Stok Birimi",
+        verbose_name=_("Stock unit"),
         on_delete=models.PROTECT,
     )
 
@@ -111,22 +114,19 @@ class ItemImage(models.Model):
         Item, on_delete=models.CASCADE, related_name="images"
     )
     image: models.ImageField = models.ImageField(
-        "Ürün/Hizmet Fotoğrafı", upload_to=get_item_image_location
+        _("Item/Service image"),
+        upload_to=get_item_image_location,
     )
     description: str = models.TextField("Açıklama", null=True, blank=True)
 
 
 class Warehouse(models.Model):
-    name: str = models.CharField("Depo adı", max_length=100)
-    address: str = models.CharField(
-        "Adress (varsa)", null=True, blank=True, max_length=200
-    )
-    phone: str = models.CharField("Telefon", null=True, blank=True, max_length=20)
-    mobile: bool = models.BooleanField("Hareketli Depo(Araç)", default=False)
+    name: str = models.CharField(_("Depot name"), max_length=100)
+    address: str = models.CharField(_("Address"), null=True, blank=True, max_length=200)
+    phone: str = models.CharField(_("Phone"), null=True, blank=True, max_length=20)
     plate_number: str = models.CharField(
-        "Plaka (varsa)", null=True, blank=True, max_length=20
+        _("Plate number"), null=True, blank=True, max_length=20
     )
-
     stocks: QuerySet["WarehouseItemStock"]  # reverse foreign key
 
     def __str__(self):
@@ -135,17 +135,20 @@ class Warehouse(models.Model):
 
 class WarehouseItemStock(models.Model):
     item: Item = models.ForeignKey(
-        Item, verbose_name="Ürün", on_delete=models.CASCADE, related_name="stocks"
+        Item,
+        verbose_name=_("Item/Service"),
+        on_delete=models.CASCADE,
+        related_name="stocks",
     )
     warehouse: Warehouse = models.ForeignKey(
         Warehouse,
-        verbose_name="Depo",
+        verbose_name=_("Depot name"),
         on_delete=models.PROTECT,
         null=True,
         related_name="stocks",
     )  # probably dangerous if it was CASCADE
     amount_db: models.DecimalField = models.DecimalField(
-        "Miktar", max_digits=19, decimal_places=4, default=None, null=True, blank=True
+        _("Amount"), max_digits=19, decimal_places=4, default=None, null=True, blank=True
     )
 
     @staticmethod

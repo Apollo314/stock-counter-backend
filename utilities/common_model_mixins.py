@@ -2,16 +2,15 @@ from django.db import models
 from django.utils import timezone
 
 # from django.contrib.auth.models import User
-from django.utils.translation import gettext_lazy as lazy
+from django.utils.translation import gettext_lazy as _
 
 from users.models import User
-from rest_framework import serializers
 
 
 class CreateUpdateInfo(models.Model):
     created_by: User = models.ForeignKey(
         User,
-        verbose_name=lazy("Oluşturan"),
+        verbose_name=_("Created by"),
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
@@ -19,22 +18,21 @@ class CreateUpdateInfo(models.Model):
     )
     updated_by: User = models.ForeignKey(
         User,
-        verbose_name=lazy("Değiştiren"),
+        verbose_name=_("Updated by"),
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
         related_name="updated_%(class)s",
     )
     created_at: timezone = models.DateTimeField(
-        default=timezone.now, verbose_name=lazy("Oluşturma Tarihi")
+        default=timezone.now, verbose_name=_("Created at")
     )
     updated_at: timezone = models.DateTimeField(
-        verbose_name=lazy("Değiştirme Tarihi"), auto_now=True, null=True, blank=True
+        verbose_name=_("Updated at"), auto_now=True, null=True, blank=True
     )
 
     class Meta:
         abstract = True
-
 
 
 class FilterOutInactiveObjectsManager(models.Manager):
@@ -42,6 +40,7 @@ class FilterOutInactiveObjectsManager(models.Manager):
         queryset = super().get_queryset()
         queryset = queryset.filter(inactivated=False)
         return queryset
+
 
 class FilterOutActiveObjectsManager(models.Manager):
     def get_queryset(self):
@@ -53,7 +52,7 @@ class FilterOutActiveObjectsManager(models.Manager):
 class InactivatedMixin(models.Model):
     """creates a field called inactivated and two managers to filter them.
     managers are called active_objects and inactive_objects, also has objects manager
-    which doesn't do filtering. 
+    which doesn't do filtering.
     default manager is active_objects."""
 
     inactivated: bool = models.BooleanField("Gizli", default=False)

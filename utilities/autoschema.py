@@ -1,5 +1,7 @@
-from drf_spectacular.extensions import (OpenApiFilterExtension,
-                                        OpenApiSerializerFieldExtension)
+from drf_spectacular.extensions import (
+    OpenApiFilterExtension,
+    OpenApiSerializerFieldExtension,
+)
 from drf_spectacular.openapi import AutoSchema as AutoSchema_
 from drf_spectacular.plumbing import ResolvedComponent
 
@@ -57,3 +59,11 @@ class AutoSchema(AutoSchema_):
         if self._is_list_view():
             operation["x-filters"] = self._get_filters()
         return operation
+
+    # this exist because drf_spectacular for some reason,
+    # thinks it's fine to remove title if it field.field_name and field.label
+    # resembles each other.
+    def _get_serializer_field_meta(self, field, direction):
+        result = super()._get_serializer_field_meta(field, direction)
+        result["title"] = field.label
+        return result

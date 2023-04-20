@@ -1,15 +1,16 @@
-from decimal import Decimal
 from typing import Any, OrderedDict
 
-from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
 from inventory import models
-from users.serializers import ConciseUserSerializer, UserSerializer
+from users.serializers import ConciseUserSerializer
 from utilities.serializer_helpers import CurrentUserDefault
 from utilities.serializermixins import UniqueFieldsMixin
-from utilities.serializers import (DynamicFieldsModelSerializer,
-                                   ModelSerializer, UpdateListSerializer)
+from utilities.serializers import (
+    DynamicFieldsModelSerializer,
+    ModelSerializer,
+    UpdateListSerializer,
+)
 
 
 # @extend_schema_serializer(
@@ -70,7 +71,7 @@ class StockUnitSerializer(UniqueFieldsMixin, ModelSerializer):
 class WarehouseSerializer(ModelSerializer):
     class Meta:
         model = models.Warehouse
-        fields = ["id", "name", "address", "phone", "mobile", "plate_number"]
+        fields = ["id", "name", "address", "phone", "plate_number"]
 
 
 class WarehouseItemStockSerializer(ModelSerializer):
