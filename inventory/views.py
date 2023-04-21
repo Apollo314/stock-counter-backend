@@ -1,5 +1,6 @@
 from django.db.models import QuerySet
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie, vary_on_headers
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
@@ -64,62 +65,60 @@ class ItemViewset(ModelViewSet):
         "category": {
             "in": {
                 "component": "multi-category-selector",
-                "props": {"label": "category"},
+                "props": {"label": _("Category")},
             },
             "isnull": {
                 "component": "checkbox",
                 "props": {
-                    "true_label": "only_categoryless",
-                    "false_label": "only_categorized",
-                    "indetermined_label": "with_or_without_cateogory",
+                    "label": _("Show categoryless"),
                     "toggleIndeterminate": True,
                 },
             },
         },
         "buyprice": {
-            "range": {"component": "money-range", "props": {"label": "buyprice"}}
+            "range": {"component": "money-range", "props": {"label": _("Buy price")}}
         },
         "sellprice": {
-            "range": {"component": "money-range", "props": {"label": "sellprice"}}
+            "range": {"component": "money-range", "props": {"label": _("Sell price")}}
         },
         "barcode": {
-            "exact": {"component": "barcode-scanner", "props": {"label": "barcode"}}
+            "exact": {"component": "barcode-scanner", "props": {"label": _("Barcode")}}
         },
         "stock_unit": {
             "in": {
                 "component": "multi-stockunit-selector",
-                "props": {"label": "stockunit"},
+                "props": {"label": _("Stock unit")},
             }
         },
         "created_at": {
             "range": {
                 "component": "date-time-range",
-                "props": {"label": "created_at"},
+                "props": {"label": _("Created at")},
             }
         },
         "updated_at": {
             "range": {
                 "component": "date-time-range",
-                "props": {"label": "updated_at"},
+                "props": {"label": _("Updated at")},
             }
         },
         "created_by": {
             "exact": {
                 "component": "user-select",
-                "props": {"label": "created_by"},
+                "props": {"label": _("Created by")},
             }
         },
         "updated_by": {
             "exact": {
                 "component": "user-select",
-                "props": {"label": "updated_by"},
+                "props": {"label": _("Updated by")},
             }
         },
         "inactivated": {
             "exact": {
                 "component": "checkbox",
                 "props": {
-                    "label": "inactivated",
+                    "label": _("Show inactivated Items/Services"),
                     "toggleIndeterminate": True,
                 },
             }
@@ -128,7 +127,7 @@ class ItemViewset(ModelViewSet):
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(1))
-    @method_decorator(vary_on_headers("Authorization"))
+    @method_decorator(vary_on_cookie)
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
