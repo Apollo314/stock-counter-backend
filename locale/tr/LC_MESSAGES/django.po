@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-20 22:05+0300\n"
+"POT-Creation-Date: 2023-04-21 07:28+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,73 +18,163 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: .\inventory\models.py:22 .\inventory\models.py:93
+#: .\inventory\models.py:17 .\inventory\models.py:88 .\inventory\views.py:68
 msgid "Category"
 msgstr "Kategori"
 
-#: .\inventory\models.py:34 .\inventory\models.py:100
+#: .\inventory\models.py:29 .\inventory\models.py:95 .\inventory\views.py:90
 msgid "Stock unit"
 msgstr "Birim"
 
-#: .\inventory\models.py:52 .\inventory\models.py:139
+#: .\inventory\models.py:47 .\inventory\models.py:134
 msgid "Item/Service"
 msgstr "Ürün/Hizmet"
 
-#: .\inventory\models.py:54
+#: .\inventory\models.py:49
 msgid "Description"
 msgstr "Açıklama"
 
-#: .\inventory\models.py:59
+#: .\inventory\models.py:54 .\inventory\views.py:79
 msgid "Buy price"
 msgstr "Alış fiyatı"
 
-#: .\inventory\models.py:62
+#: .\inventory\models.py:57
 msgid "Buy currency"
 msgstr "Alış para birimi"
 
-#: .\inventory\models.py:70
+#: .\inventory\models.py:65 .\inventory\views.py:82
 msgid "Sell price"
 msgstr "Satış fiyatı"
 
-#: .\inventory\models.py:73
+#: .\inventory\models.py:68
 msgid "Sell currency"
 msgstr "Satış para birimi"
 
-#: .\inventory\models.py:80
+#: .\inventory\models.py:75 .\inventory\views.py:85
 msgid "Barcode"
 msgstr "Barkod"
 
-#: .\inventory\models.py:83
+#: .\inventory\models.py:78
 msgid "Stock code"
 msgstr "Birim kodu"
 
-#: .\inventory\models.py:88
+#: .\inventory\models.py:83
 msgid "Thumbnail"
 msgstr "Önizleme resmi"
 
-#: .\inventory\models.py:117
+#: .\inventory\models.py:112
 msgid "Item/Service image"
 msgstr "Ürün/Hizmet resmi"
 
-#: .\inventory\models.py:124 .\inventory\models.py:145
+#: .\inventory\models.py:119 .\inventory\models.py:140
 msgid "Depot name"
 msgstr "Depo adı"
 
-#: .\inventory\models.py:125
+#: .\inventory\models.py:120
 msgid "Address"
 msgstr "Adres"
 
-#: .\inventory\models.py:126
+#: .\inventory\models.py:121
 msgid "Phone"
 msgstr "Telefon"
 
-#: .\inventory\models.py:128
+#: .\inventory\models.py:123
 msgid "Plate number"
 msgstr "Plaka numarası"
 
-#: .\inventory\models.py:151
+#: .\inventory\models.py:146 .\inventory\models.py:198
 msgid "Amount"
 msgstr "Miktar"
+
+#: .\inventory\views.py:73
+msgid "Show categoryless"
+msgstr "Kategorisizleri göster"
+
+#: .\inventory\views.py:96 .\utilities\common_model_mixins.py:28
+msgid "Created at"
+msgstr "Oluşturulma tarihi"
+
+#: .\inventory\views.py:102 .\utilities\common_model_mixins.py:31
+msgid "Updated at"
+msgstr "Güncelleme tarihi"
+
+#: .\inventory\views.py:108 .\utilities\common_model_mixins.py:13
+msgid "Created by"
+msgstr "Oluşturan"
+
+#: .\inventory\views.py:114 .\utilities\common_model_mixins.py:21
+msgid "Updated by"
+msgstr "Güncelleyen"
+
+#: .\inventory\views.py:121
+msgid "Show inactivated Items/Services"
+msgstr "İnaktif Ürün/Hizmetleri göster"
+
+#: .\invoice\models.py:23
+msgid "Invoice type"
+msgstr "Fatura tipi"
+
+#: .\invoice\models.py:29
+msgid "Last payment date"
+msgstr "Son ödeme tarihi"
+
+#: .\invoice\models.py:32
+msgid "Invoice currency"
+msgstr "Fatura para birimi"
+
+#: .\invoice\models.py:38
+msgid "Currency exchange rate"
+msgstr "Fatura döviz kuru"
+
+#: .\invoice\models.py:45
+msgid "Total without tax"
+msgstr "Vergisiz toplam"
+
+#: .\invoice\models.py:48
+msgid "Total with tax"
+msgstr "Vergiler dahil toplam"
+
+#: .\invoice\models.py:52
+msgid "Stakeholder"
+msgstr "Alakalı taraf"
+
+#: .\invoice\models.py:58
+msgid "Invoices"
+msgstr "Faturalar"
+
+#: .\invoice\models.py:59
+#, fuzzy
+#| msgid "Depot name"
+msgid "Depot"
+msgstr "Depo adı"
+
+#: .\invoice\models.py:66
+msgid "Related invoices"
+msgstr "Alakalı faturalar"
+
+#: .\invoice\models.py:67
+msgid "Refund invoice"
+msgstr "İade faturası"
+
+#: .\invoice\models.py:74
+msgid "Invoice"
+msgstr "Fatura"
+
+#: .\invoice\models.py:78
+msgid "View all invoices"
+msgstr "Tüm faturaları görüntüleme"
+
+#: .\invoice\models.py:91
+msgid "Stock movement"
+msgstr "Stok hareketi"
+
+#: .\invoice\models.py:92
+msgid "Invoice item"
+msgstr "Fatura satırı"
+
+#: .\invoice\models.py:94
+msgid "Price"
+msgstr "Fiyat"
 
 #: .\users\authentication.py:37
 msgid "Invalid token."
@@ -102,19 +192,3 @@ msgstr "Parola"
 msgid ""
 "Couldn't login with the given information. Password or Username may be wrong."
 msgstr "Verilen bilgilerle giriş yapılamadı. Kontrol ederek yeniden giriniz."
-
-#: .\utilities\common_model_mixins.py:13
-msgid "Created by"
-msgstr "Oluşturan"
-
-#: .\utilities\common_model_mixins.py:21
-msgid "Updated by"
-msgstr "Güncelleyen"
-
-#: .\utilities\common_model_mixins.py:28
-msgid "Created at"
-msgstr "Oluşturulma tarihi"
-
-#: .\utilities\common_model_mixins.py:31
-msgid "Updated at"
-msgstr "Güncelleme tarihi"

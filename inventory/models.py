@@ -1,20 +1,15 @@
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import List, Optional
 
-from django.core.cache import cache
 from django.db import models
 from django.db.models import QuerySet
 from django.db.models.aggregates import Sum
-from django.db.models.expressions import Q
-from django.forms import DecimalField
-from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from simple_history.models import HistoricalRecords
 
-from utilities.caches import persistent_cached_property
 from utilities.common_model_mixins import CreateUpdateInfo, InactivatedMixin
-from utilities.enums import KDV, Currency, StockMovementType
+from utilities.enums import KDV, Currency
 from utilities.validators import not_zero_validator
 
 
@@ -148,7 +143,12 @@ class WarehouseItemStock(models.Model):
         related_name="stocks",
     )  # probably dangerous if it was CASCADE
     amount_db: models.DecimalField = models.DecimalField(
-        _("Amount"), max_digits=19, decimal_places=4, default=None, null=True, blank=True
+        _("Amount"),
+        max_digits=19,
+        decimal_places=4,
+        default=None,
+        null=True,
+        blank=True,
     )
 
     @staticmethod
@@ -195,7 +195,7 @@ class StockMovement(CreateUpdateInfo):
         WarehouseItemStock, verbose_name="Stok", on_delete=models.CASCADE
     )
     amount: Decimal = models.DecimalField(
-        "Miktar",
+        _("Amount"),
         max_digits=19,
         decimal_places=4,
         validators=[not_zero_validator],
