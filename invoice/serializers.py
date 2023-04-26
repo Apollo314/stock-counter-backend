@@ -2,32 +2,21 @@ from decimal import Decimal
 from typing import OrderedDict
 
 from django.db import IntegrityError
-from drf_spectacular.utils import extend_schema_serializer
-from rest_framework import serializers, validators
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from inventory.models import WarehouseItemStock
 
-from inventory.serializers import (
-    StockMovementNestedSerializer,
-    WarehouseItemStockInfoSerializer,
-)
-from inventory.serializers import (
-    WarehouseItemStockNestedSerializer,
-    WarehouseSerializer,
-)
+from inventory.models import WarehouseItemStock
+from inventory.serializers import (StockMovementNestedSerializer,
+                                   WarehouseItemStockInfoSerializer,
+                                   WarehouseSerializer)
 from invoice import models
 from invoice.serializer_helpers import calculate_total
-from stakeholder.serializers import StakeholderBasicSerializer, StakeholderSerializer
-from users.serializers import ConciseUserSerializer, UserSerializer
+from stakeholder.serializers import (StakeholderBasicSerializer,
+                                     StakeholderSerializer)
+from users.serializers import ConciseUserSerializer
 from utilities.enums import InvoiceType
-from utilities.serializers import (
-    CreateListSerializer,
-    DynamicFieldsModelSerializer,
-    ModelSerializer,
-)
 from utilities.serializer_helpers import CurrentUserDefault
-
-from utilities.caches import generate_cache_name, cache
+from utilities.serializers import DynamicFieldsModelSerializer, ModelSerializer
 
 
 class InvoiceItemListSerializer(serializers.ListSerializer):
