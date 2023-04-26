@@ -42,6 +42,7 @@ ipython = "^8.5.0"
 black = {version = "^22.10.0", allow-prereleases = true}
 ipykernel = "^6.17.1"
 ipdb = "^0.13.11"
+pylint = "^2.17.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -55,7 +56,5 @@ exclude = ["**/node_modules",
     "src/experimental",
     "src/typestubs"
 ]
-#venvPath = "C:/Users/Apollo/AppData/Local/Packages/PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0/LocalCache/Local/pypoetry/Cache/virtualenvs"
-venvPath = "/home/apollo/.cache/pypoetry/virtualenvs"
-#venv = "goktugv2-4yG3oDP2-py3.11"
-venv = "goktugv2-80JKcZd0-py3.10"
+venvPath = "C:/Users/Apollo/AppData/Local/Packages/PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0/LocalCache/Local/pypoetry/Cache/virtualenvs"
+venv = "goktugv2-4yG3oDP2-py3.11"

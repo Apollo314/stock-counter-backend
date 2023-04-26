@@ -13,14 +13,14 @@ from utilities.serializers import (
 )
 
 
-# @extend_schema_serializer(
-#     extensions={
-#         "x-components": {
-#             "parent": {"component": "category-selector"},
-#         }
-#     }
-# )
+class SimpleCategorySerializer(ModelSerializer):
+    class Meta:
+        model = models.Category
+        fields = ["id", "name"]
+
+
 class CategorySerializer(ModelSerializer):
+    # parent = serializers.PrimaryKeyRelatedField(write_only=True)
     field_overrides = {
         "parent": {"component": "category-selector"},
     }
@@ -30,13 +30,15 @@ class CategorySerializer(ModelSerializer):
             qs = self.Meta.model._default_manager.filter(name__iexact=value)
             if qs.exists():
                 raise serializers.ValidationError(
-                    f"Kategori büyük küçük harf duyarsız şekilde eşsiz olmalı."
+                    "Kategori büyük küçük harf duyarsız şekilde eşsiz olmalı."
                 )
         return value
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: models.Category):
         representation = super().to_representation(instance)
-        return {**representation, "parent": CategorySerializer(instance.parent).data}
+        if instance.parent:
+            representation["parent"] = SimpleCategorySerializer(instance.parent).data
+        return representation
 
     def validate_parent(self, value):
         if self.instance == value:
@@ -45,10 +47,13 @@ class CategorySerializer(ModelSerializer):
 
     class Meta:
         model = models.Category
-        fields = ["id", "name", "parent"]
-        # extra_kwargs = {
-        #   'parent': {'write_only': True}
-        # }
+        fields = ["id", "name", "parent", "children"]
+
+    def get_fields(self):
+        fields = super().get_fields()
+        if self.Meta.fields.index("children"):
+            fields["children"] = SimpleCategorySerializer(read_only=True, many=True)
+        return fields
 
 
 class StockUnitSerializer(UniqueFieldsMixin, ModelSerializer):
@@ -59,7 +64,7 @@ class StockUnitSerializer(UniqueFieldsMixin, ModelSerializer):
             qs = self.Meta.model._default_manager.filter(name__iexact=value)
             if qs.exists():
                 raise serializers.ValidationError(
-                    f"Birim büyük küçük harf duyarsız şekilde eşsiz olmalı."
+                    "Birim büyük küçük harf duyarsız şekilde eşsiz olmalı."
                 )
         return value
 

@@ -130,6 +130,9 @@ class InvoiceListSerializer(ModelSerializer):
 
 
 class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
+    field_overrides = {
+        "warehouse": {"component": "warehouse-selector"},
+    }
     negate_map = {
         InvoiceType.purchase: False,
         InvoiceType.sale: True,

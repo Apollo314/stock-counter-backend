@@ -1,9 +1,10 @@
 from uuid import uuid4
-from django.contrib.auth.models import Group, Permission, AnonymousUser
+
+from django.contrib.auth.models import AnonymousUser, Group, Permission
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.response import Response
-from rest_framework.test import APIClient, APIRequestFactory
+from rest_framework.test import APIClient
 
 from inventory.models import StockUnit
 from users.models import User
