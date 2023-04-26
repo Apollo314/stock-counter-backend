@@ -172,7 +172,7 @@ REST_FRAMEWORK = {
         "users.authentication.TokenCookieAuthentication",
         # "knox.auth.TokenAuthentication",
         # "rest_framework.authentication.BasicAuthentication",
-        # "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
         # 'rest_framework.authentication.TokenAuthentication',
     ],
     "DEFAULT_PERMISSION_CLASSES": [
@@ -225,29 +225,38 @@ CACHES = {
 }
 
 
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     # "filters": {
-#     #     "require_debug_true": {
-#     #         "()": "django.utils.log.RequireDebugTrue",
-#     #     }
-#     # },
-#     "handlers": {
-#         "console": {
-#             "level": "DEBUG",
-#             # "filters": ["require_debug_true"],
-#             "class": "logging.StreamHandler",
-#         }
-#     },
-#     "loggers": {
-#         "django.db.backends": {
-#             "level": "DEBUG",
-#             "handlers": ["console"],
-#         },
-#         # 'django': {
-#         #     'handlers': ['console'],
-#         #     'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
-#         # }
-#     },
-# }
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    # "filters": {
+    #     "require_debug_true": {
+    #         "()": "django.utils.log.RequireDebugTrue",
+    #     }
+    # },
+    "handlers": {
+        # "console": {
+        #     "level": "DEBUG",
+        #     # "filters": ["require_debug_true"],
+        #     "class": "logging.StreamHandler",
+        # }
+        "file": {
+            "level": "WARNING",
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "warning.log",
+        }
+    },
+    "loggers": {
+        "root": {
+            "level": "WARNING",
+            "handlers": ["file"],
+        }
+        # "django.db.backends": {
+        #     "level": "DEBUG",
+        #     "handlers": ["console"],
+        # },
+        # 'django': {
+        #     'handlers': ['console'],
+        #     'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        # }
+    },
+}

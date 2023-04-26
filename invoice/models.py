@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from inventory.models import StockMovement, Warehouse
 from stakeholder.models import Stakeholder
@@ -16,49 +17,47 @@ def week_from_now():
 
 
 class Invoice(CreateUpdateInfo):
-    """Satış, Alış ya da iade faturası"""
-
     invoice_type: InvoiceType = models.CharField(
-        "Fatura Tipi", max_length=20, choices=InvoiceType.choices
+        _("Invoice type"), max_length=20, choices=InvoiceType.choices
     )
-    name: str = models.CharField("Fatura Adı", max_length=100)
-    description: str = models.TextField("Açıklama", null=True, blank=True)
-    invoice_conditions = models.TextField("Fatura Koşulları", null=True, blank=True)
+    name: str = models.CharField(_("Invoice name"), max_length=100)
+    description: str = models.TextField(_("Description"), null=True, blank=True)
+    invoice_conditions = models.TextField(_("Invoice conditions"), null=True, blank=True)
     last_payment_date: datetime = models.DateTimeField(
-        "Son Ödeme Tarihi", default=week_from_now
+        _("Last payment date"), default=week_from_now
     )
     currency: Currency = models.CharField(
-        "Fatura Para Birimi",
+        _("Invoice currency"),
         max_length=4,
         choices=Currency.choices,
         default=Currency.turkish_lira,
     )
     currency_exchange_rate: Decimal = models.DecimalField(
-        "Döviz Kuru", max_digits=19, decimal_places=4, null=True, blank=True
+        _("Currency exchange rate"), max_digits=19, decimal_places=4, null=True, blank=True
     )
     total: Decimal = models.DecimalField(
-        "Toplam Kdv Hariç Tutar", max_digits=19, decimal_places=4, null=True, blank=True
+        _("Total without tax"), max_digits=19, decimal_places=4, null=True, blank=True
     )
     total_with_tax: Decimal = models.DecimalField(
-        "Toplam Kdv Dahil Tutar", max_digits=19, decimal_places=4, null=True, blank=True
+        _("Total with tax"), max_digits=19, decimal_places=4, null=True, blank=True
     )
 
     stakeholder: Stakeholder = models.ForeignKey(
-        Stakeholder, verbose_name="Alakalı Taraf", on_delete=models.PROTECT
+        Stakeholder, verbose_name=_("Stakeholder"), on_delete=models.PROTECT
     )
 
     warehouse: Warehouse = models.ForeignKey(
         Warehouse,
         on_delete=models.PROTECT,
         related_name="invoices",
-        verbose_name="Alakalı Depo",
+        verbose_name=_("Depot"),
     )
 
     items: models.QuerySet["InvoiceItem"]
 
     related_invoice = models.ManyToManyField(
         "self",
-        verbose_name=("Alakalı Fatura(lar)"),
+        verbose_name=_("Related invoices"),
         related_name="refund_invoice",
         blank=True,
         symmetrical=False,
@@ -68,23 +67,23 @@ class Invoice(CreateUpdateInfo):
         return f"Fatura - {self.name[:40]} - {self.created_at}"
 
     class Meta:
-        permissions = [("view_all_invoices", "Tüm faturaları görebilir")]
+        permissions = [("view_all_invoices", _("Can view all invoices"))]
 
 
 class InvoiceItem(models.Model):
     invoice: Invoice = models.ForeignKey(
         Invoice,
         on_delete=models.CASCADE,
-        verbose_name="Alakalı Fatura",
+        verbose_name=_("Related Invoice"),
         related_name="items",
     )
     stock_movement: StockMovement = models.OneToOneField(
         StockMovement,
         on_delete=models.PROTECT,
-        verbose_name="Stok Hareketi",
+        verbose_name=_("Stock movement"),
         related_name="invoice_item",
     )
-    price: Decimal = models.DecimalField("Fiyat", max_digits=19, decimal_places=4)
+    price: Decimal = models.DecimalField(_("Price"), max_digits=19, decimal_places=4)
 
     def __str__(self):
         return f"{self.invoice}: {self.stock_movement}"

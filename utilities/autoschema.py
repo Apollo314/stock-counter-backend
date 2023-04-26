@@ -1,9 +1,11 @@
-from drf_spectacular.extensions import (
-    OpenApiFilterExtension,
-    OpenApiSerializerFieldExtension,
-)
+import logging
+
+from drf_spectacular.extensions import (OpenApiFilterExtension,
+                                        OpenApiSerializerFieldExtension)
 from drf_spectacular.openapi import AutoSchema as AutoSchema_
 from drf_spectacular.plumbing import ResolvedComponent
+
+logger = logging.getLogger(__name__)
 
 
 def build_media_type_object(schema, examples=None):
@@ -28,14 +30,15 @@ class AutoSchema(AutoSchema_):
         self, serializer, direction, bypass_extensions=False
     ) -> ResolvedComponent:
         result = super().resolve_serializer(serializer, direction, bypass_extensions)
-        if hasattr(serializer, "field_overrides"):
-            field_overrides = serializer.field_overrides
-            for key, override in field_overrides.items():
-                try:
-                    result.schema["properties"][key]["x-components"] = override
-                except:
-                    print("oh well")
-            return result
+        if result.schema:
+            if hasattr(serializer, "field_overrides"):
+                field_overrides = serializer.field_overrides
+                for key, override in field_overrides.items():
+                    try:
+                        result.schema["properties"][key]["x-components"] = override
+                    except Exception as ex:
+                        logger.exception(ex)
+                return result
         return result
 
     def _get_filters(self) -> dict:
