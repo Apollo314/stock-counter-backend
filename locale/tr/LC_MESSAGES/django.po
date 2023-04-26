@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-21 07:28+0300\n"
+"POT-Creation-Date: 2023-04-26 08:16+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,7 +30,7 @@ msgstr "Birim"
 msgid "Item/Service"
 msgstr "Ürün/Hizmet"
 
-#: .\inventory\models.py:49
+#: .\inventory\models.py:49 .\invoice\models.py:24
 msgid "Description"
 msgstr "Açıklama"
 
@@ -110,69 +110,71 @@ msgstr "Güncelleyen"
 msgid "Show inactivated Items/Services"
 msgstr "İnaktif Ürün/Hizmetleri göster"
 
-#: .\invoice\models.py:23
+#: .\invoice\models.py:21
 msgid "Invoice type"
 msgstr "Fatura tipi"
 
-#: .\invoice\models.py:29
+#: .\invoice\models.py:23
+msgid "Invoice name"
+msgstr "Fatura adı"
+
+#: .\invoice\models.py:25
+#, fuzzy
+#| msgid "Invoice item"
+msgid "Invoice conditions"
+msgstr "Fatura koşulları"
+
+#: .\invoice\models.py:27
 msgid "Last payment date"
 msgstr "Son ödeme tarihi"
 
-#: .\invoice\models.py:32
+#: .\invoice\models.py:30
 msgid "Invoice currency"
 msgstr "Fatura para birimi"
 
-#: .\invoice\models.py:38
+#: .\invoice\models.py:36
 msgid "Currency exchange rate"
 msgstr "Fatura döviz kuru"
 
-#: .\invoice\models.py:45
+#: .\invoice\models.py:39
 msgid "Total without tax"
 msgstr "Vergisiz toplam"
 
-#: .\invoice\models.py:48
+#: .\invoice\models.py:42
 msgid "Total with tax"
 msgstr "Vergiler dahil toplam"
 
-#: .\invoice\models.py:52
+#: .\invoice\models.py:46
 msgid "Stakeholder"
 msgstr "Alakalı taraf"
 
-#: .\invoice\models.py:58
-msgid "Invoices"
-msgstr "Faturalar"
-
-#: .\invoice\models.py:59
+#: .\invoice\models.py:53
 #, fuzzy
 #| msgid "Depot name"
 msgid "Depot"
 msgstr "Depo adı"
 
-#: .\invoice\models.py:66
+#: .\invoice\models.py:60
 msgid "Related invoices"
 msgstr "Alakalı faturalar"
 
-#: .\invoice\models.py:67
-msgid "Refund invoice"
-msgstr "İade faturası"
-
-#: .\invoice\models.py:74
-msgid "Invoice"
-msgstr "Fatura"
-
-#: .\invoice\models.py:78
-msgid "View all invoices"
+#: .\invoice\models.py:70
+#, fuzzy
+#| msgid "View all invoices"
+msgid "Can view all invoices"
 msgstr "Tüm faturaları görüntüleme"
 
-#: .\invoice\models.py:91
+#: .\invoice\models.py:77
+#, fuzzy
+#| msgid "Related invoices"
+msgid "Related Invoice"
+msgstr "Alakalı faturalar"
+
+#: .\invoice\models.py:83
 msgid "Stock movement"
 msgstr "Stok hareketi"
 
-#: .\invoice\models.py:92
-msgid "Invoice item"
-msgstr "Fatura satırı"
-
-#: .\invoice\models.py:94
+#: .\invoice\models.py:86
 msgid "Price"
 msgstr "Fiyat"
 
