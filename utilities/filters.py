@@ -2,7 +2,8 @@ from datetime import datetime
 
 from django.db import models
 from django_filters import DateFromToRangeFilter, fields, filters, filterset
-from django_filters.rest_framework import DjangoFilterBackend as _DjangoFilterBackend
+from django_filters.rest_framework import \
+    DjangoFilterBackend as _DjangoFilterBackend
 from drf_spectacular.plumbing import follow_model_field_lookup
 from rest_framework.filters import OrderingFilter as _OrderingFilter
 from rest_framework.filters import SearchFilter as _SearchFilter
@@ -56,6 +57,7 @@ class FilterSet(filterset.FilterSet):
         return super().filter_for_lookup(f, lookup_type)
 
 
+
 class DjangoFilterBackend(_DjangoFilterBackend):
     filterset_base = FilterSet
 
@@ -70,7 +72,8 @@ class DjangoFilterBackend(_DjangoFilterBackend):
         if not filterset_class:
             return []
 
-        filterset_fields = getattr(view, "filterset_fields", None)
+        filterset_fields = getattr(view, "filterset_fields", filterset_class.Meta.fields)
+        filterset_overrides = getattr(view, "filterset_overrides", {})
         parameters = []
         for field_name, field in filterset_class.base_filters.items():
             separator_index = field_name.rfind("__")
@@ -109,6 +112,7 @@ class DjangoFilterBackend(_DjangoFilterBackend):
                     "iregex",
                     "range",
                     "isnull",
+                    "notin"  # custom, not conventional
                 ]:
                     key += "__" + lookup
                     lookup = "exact"
@@ -122,7 +126,7 @@ class DjangoFilterBackend(_DjangoFilterBackend):
                 "description": field.label if field.label is not None else field_name,
                 "schema": {
                     "type": "string",
-                    "x-components": filterset_fields[key][lookup],
+                    "x-components": filterset_fields.get(key, {}).get(lookup, None) or filterset_overrides.get(key, {}).get(lookup, None),
                 },
             }
             if field.extra and "choices" in field.extra:

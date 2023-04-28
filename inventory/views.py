@@ -1,3 +1,4 @@
+import django_filters
 from django.db.models import QuerySet
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
@@ -39,29 +40,12 @@ class StockUnitViewset(ModelViewSet):
     search_fields = ["name"]
 
 
-class ItemViewset(ModelViewSet):
-    queryset = (
-        models.Item.objects.select_related(
-            "created_by",
-            "updated_by",
-            "category",
-            "stock_unit",
-        )
-        .prefetch_related("stocks")
-        .all()
-    )
-    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
-    ordering_fields = [
-        "id",
-        "name",
-        "created_at",
-        "buyprice",
-        "sellprice",
-        "updated_at",
-        "category",
-    ]
-    ordering = ["-id"]
-    filterset_fields = {
+
+class ItemFilter(django_filters.FilterSet):
+    id__notin = django_filters.BaseInFilter(field_name="id", lookup_expr="in", exclude=True)
+    class Meta:
+        model = models.Item
+        fields = {
         "category": {
             "in": {
                 "component": "multi-category-selector",
@@ -124,6 +108,37 @@ class ItemViewset(ModelViewSet):
             }
         },
     }
+
+class ItemViewset(ModelViewSet):
+    queryset = (
+        models.Item.objects.select_related(
+            "created_by",
+            "updated_by",
+            "category",
+            "stock_unit",
+        )
+        .prefetch_related("stocks")
+        .all()
+    )
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    filterset_class = ItemFilter
+    filterset_overrides = {
+        "id": {
+            "notin": {
+                "component": "hidden",
+            }
+        }
+    }
+    ordering_fields = [
+        "id",
+        "name",
+        "created_at",
+        "buyprice",
+        "sellprice",
+        "updated_at",
+        "category",
+    ]
+    ordering = ["-id"]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(1))
@@ -144,7 +159,7 @@ class ItemHistoryViewset(ItemViewset):
     queryset = models.Item.history.select_related(
         "created_by", "updated_by", "category", "stock_unit"
     ).all()
-    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    filter_backends = [OrderingFilter, SearchFilter]
     ordering_fields = [
         "id",
         "name",
