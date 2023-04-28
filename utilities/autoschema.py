@@ -19,6 +19,8 @@ def build_media_type_object(schema, examples=None):
 
 
 class AutoSchema(AutoSchema_):
+
+    pass
     # def get_tags(self) -> typing.List[str]:
     #   """ override this for custom behaviour """
     #   tokenized_path = self._tokenize_path()
