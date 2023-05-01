@@ -128,8 +128,27 @@ class InvoiceListSerializer(ModelSerializer):
             "warehouse",
         ]
 
+class InvoiceConditionSerializerIn(ModelSerializer):
+    id = serializers.UUIDField(required=False)
+    class Meta:
+        model = models.InvoiceCondition
+        fields = ['id', 'condition_name', 'conditions']
+        extra_kwargs = {
+            'condition_name': {'validators': []},
+        }
+
+class InvoiceConditionSerializerOut(ModelSerializer):
+    created_by = serializers.HiddenField(default=CurrentUserDefault())
+    updated_by = serializers.HiddenField(default=CurrentUserDefault())
+
+    class Meta:
+        model = models.InvoiceCondition
+        fields = ['id', 'condition_name', 'conditions', 'created_by', 'updated_by', 'created_at', 'updated_at']
+
 
 class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
+    # TODO: items should have an order field and they should be ordered by that
+    invoice_conditions = InvoiceConditionSerializerIn(required=False)
     field_overrides = {
         "warehouse": {"component": "warehouse-selector"},
     }
@@ -151,8 +170,17 @@ class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
 
     def create(self, validated_data: OrderedDict):
         validated_data = calculate_total(validated_data)
+        invoice_conditions = validated_data.pop("invoice_conditions", None)
         items_data = validated_data.pop("items")
         invoice: models.Invoice = super().create(validated_data)
+        if (invoice_conditions and invoice_conditions.get('id')):
+            invoice.invoice_conditions_id = invoice_conditions.get('id')
+        elif invoice_conditions:
+            invoice_conditions = models.InvoiceCondition.objects.create(**invoice_conditions)
+            invoice.invoice_conditions_id = invoice_conditions.id
+            invoice.save()
+        else:
+            invoice.invoice_conditions = None
         warehouse = validated_data.get("warehouse")
         for item in items_data:
             item["invoice_id"] = invoice.id
@@ -161,6 +189,7 @@ class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
             )
             item["stock_movement"]["warehouse_item_stock"]["warehouse"] = warehouse
         InvoiceItemSerializer(many=True).create(items_data)
+
         return invoice
 
     def update(self, invoice: models.Invoice, validated_data: OrderedDict):
@@ -168,8 +197,20 @@ class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
         items_data: list[OrderedDict] = validated_data.pop("items")
         warehouse = validated_data.get("warehouse")
 
+        invoice_conditions = validated_data.pop("invoice_conditions", None)
+
         updated_items = []
         created_items = []
+
+        updated_item_ids = []
+
+        if invoice_conditions and invoice_conditions.get('id'):
+            invoice.invoice_conditions_id = invoice_conditions.get('id')
+        elif invoice_conditions:
+            invoice_conditions = models.InvoiceCondition.objects.create(**invoice_conditions)
+            invoice.invoice_conditions_id = invoice_conditions.id
+        else:
+            invoice.invoice_conditions = None
 
         for item in items_data:
             item["invoice_id"] = invoice.id  # just in case there is a new item
@@ -180,8 +221,17 @@ class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
             item["stock_movement"]["warehouse_item_stock"]["warehouse"] = warehouse
             if item.get("id"):
                 updated_items.append(item)
+                updated_item_ids.append(item.get('id'))
             else:
                 created_items.append(item)
+
+        items_to_delete = []
+        for existing_item in invoice.items.all():
+            if existing_item.id not in updated_item_ids:
+                items_to_delete.append(existing_item.id)
+
+        if items_to_delete:
+            invoice.items.filter(id__in=items_to_delete).delete()
 
         if len(created_items):
             InvoiceItemSerializer(many=True).create(created_items)
@@ -222,7 +272,6 @@ class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
             "invoice_type",
             "name",
             "description",
-            "invoice_conditions",
             "last_payment_date",
             "currency",
             "currency_exchange_rate",
@@ -234,12 +283,14 @@ class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
             "total_with_tax",
             "items",
             "related_invoice",
+            "invoice_conditions"
         ]
 
 
 class InvoiceDetailOutSerializer(InvoiceDetailInSerializer):
     warehouse = WarehouseSerializer()
     stakeholder = StakeholderSerializer()
+    invoice_conditions = InvoiceConditionSerializerIn(required=False)
     items = InvoiceItemSerializer(many=True)
 
 

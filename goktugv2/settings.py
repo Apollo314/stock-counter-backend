@@ -172,7 +172,7 @@ REST_FRAMEWORK = {
         "users.authentication.TokenCookieAuthentication",
         # "knox.auth.TokenAuthentication",
         # "rest_framework.authentication.BasicAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        # "rest_framework.authentication.SessionAuthentication",
         # 'rest_framework.authentication.TokenAuthentication',
     ],
     "DEFAULT_PERMISSION_CLASSES": [

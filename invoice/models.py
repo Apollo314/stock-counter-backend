@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta
 from decimal import Decimal
 
@@ -11,10 +12,15 @@ from utilities.common_model_mixins import CreateUpdateInfo
 from utilities.enums import Currency, InvoiceType
 
 
+class InvoiceCondition(CreateUpdateInfo):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    conditions: str = models.TextField(_("Invoice conditions"))
+    condition_name: str = models.CharField(_("Condition identifier name(ex: Default conditions)"), unique=True, max_length=100)
+    hidden: bool = models.BooleanField(_("Hide from list view(will persist in invoices that uses this)"), default=False)
+
 def week_from_now():
     now = timezone.now()
     return now + timedelta(weeks=1)
-
 
 class Invoice(CreateUpdateInfo):
     invoice_type: InvoiceType = models.CharField(
@@ -22,7 +28,14 @@ class Invoice(CreateUpdateInfo):
     )
     name: str = models.CharField(_("Invoice name"), max_length=100)
     description: str = models.TextField(_("Description"), null=True, blank=True)
-    invoice_conditions = models.TextField(_("Invoice conditions"), null=True, blank=True)
+    invoice_conditions: InvoiceCondition = models.ForeignKey(
+        InvoiceCondition,
+        on_delete=models.PROTECT,
+        verbose_name=_("Invoice Conditions"),
+        related_name="invoices",
+        null=True,
+        blank=True
+    )
     last_payment_date: datetime = models.DateTimeField(
         _("Last payment date"), default=week_from_now
     )

@@ -7,6 +7,7 @@ from .bulk_urls import url_patterns
 
 router = routers.SimpleRouter()
 router.register("invoice", views.InvoiceViewset)
+router.register("invoice-conditions", views.InvoiceConditionViewset)
 # router.register('invoice-item', views.InvoiceItemViewset)
 
 
