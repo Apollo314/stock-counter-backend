@@ -1,17 +1,15 @@
 from decimal import Decimal
 from uuid import uuid4
-from django.contrib.auth.models import Group, Permission, AnonymousUser
+
+from django.contrib.auth.models import AnonymousUser, Group, Permission
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.response import Response
 from rest_framework.test import APIClient, APIRequestFactory
 
 from inventory.models import Item, StockUnit, Warehouse, WarehouseItemStock
-from inventory.serializers import (
-    ItemInSerializer,
-    ItemOutSerializer,
-    WarehouseSerializer,
-)
+from inventory.serializers import (ItemInSerializer, ItemOutSerializer,
+                                   WarehouseSerializer)
 from stakeholder.models import Stakeholder, StakeholderRole
 from stakeholder.serializers import StakeholderSerializer
 from users.models import User

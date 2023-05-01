@@ -1,10 +1,6 @@
 from django.db.models import Prefetch
-from django.db.models.query import QuerySet
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
-from django.views.decorators.vary import vary_on_cookie, vary_on_headers
-from rest_framework import filters, mixins
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from django.utils.translation import gettext_lazy as _
+from rest_framework.viewsets import ModelViewSet
 
 from invoice import models, serializers
 from utilities.filters import DjangoFilterBackend, OrderingFilter, SearchFilter
@@ -27,25 +23,25 @@ class InvoiceViewset(ModelViewSet):
         "created_at": {
             "range": {
                 "component": "date-time-range",
-                "props": {"label": "Oluşturma tarihi"},
+                "props": {"label": _("Created at")},
             }
         },
         "updated_at": {
             "range": {
                 "component": "date-time-range",
-                "props": {"label": "Güncellenme tarihi"},
+                "props": {"label": _("Updated at")},
             }
         },
         "created_by": {
             "exact": {
                 "component": "user-select",
-                "props": {"label": "Oluşturan kullanıcı"},
+                "props": {"label": _("Created by")},
             }
         },
         "updated_by": {
             "exact": {
                 "component": "user-select",
-                "props": {"label": "Güncelleyen kullanıcı"},
+                "props": {"label": _("Updated by")},
             }
         },
         "invoice_type": {"exact": {"component": "hidden"}},
@@ -60,7 +56,7 @@ class InvoiceViewset(ModelViewSet):
         if self.action == "retrieve":
             queryset = (
                 models.Invoice.objects.select_related(
-                    "created_by", "updated_by", "warehouse", "stakeholder"
+                    "created_by", "updated_by", "warehouse", "stakeholder", "invoice_conditions"
                 )
                 .prefetch_related(
                     Prefetch(
@@ -76,7 +72,7 @@ class InvoiceViewset(ModelViewSet):
             )
         else:
             queryset = models.Invoice.objects.select_related(
-                "created_by", "updated_by", "warehouse", "stakeholder"
+                "created_by", "updated_by", "warehouse", "stakeholder", "invoice_conditions"
             ).all()
         return queryset
 
@@ -88,3 +84,64 @@ class InvoiceViewset(ModelViewSet):
         else:
             serializer_class = serializers.InvoiceListSerializer
         return serializer_class
+
+
+class InvoiceConditionViewset(ModelViewSet):
+    queryset = models.InvoiceCondition.objects.select_related("created_by", "updated_by").all()
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    ordering_fields = [
+        "condition_name",
+        "created_at",
+        "updated_at",
+        "created_by",
+        "updated_by",
+    ]
+    ordering = ["-created_at"]
+    filterset_fields = {
+        "created_at": {
+            "range": {
+                "component": "date-time-range",
+                "props": {"label": _("Created at")},
+            }
+        },
+        "updated_at": {
+            "range": {
+                "component": "date-time-range",
+                "props": {"label": _("Updated at")},
+            }
+        },
+        "created_by": {
+            "exact": {
+                "component": "user-select",
+                "props": {"label": _("Created by")},
+            }
+        },
+        "updated_by": {
+            "exact": {
+                "component": "user-select",
+                "props": {"label": _("Updated by")},
+            }
+        },
+        "condition_name": {
+            "icontains": {
+                "component": "hidden",
+                "props": {}
+            }
+        },
+        "conditions": {
+            "icontains": {
+                "component": "text-input",
+                "props": {"label": _("Contents")}
+            }
+        }
+    }
+    search_fields = ["condition_name"]
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update"]:
+            serializer_class = serializers.InvoiceConditionSerializerIn
+        else:
+            serializer_class = serializers.InvoiceConditionSerializerOut
+        return serializer_class
+
+
