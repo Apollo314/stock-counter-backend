@@ -2,6 +2,8 @@ from decimal import Decimal
 from typing import OrderedDict
 
 from django.db import IntegrityError
+from django.utils.translation import gettext_lazy as _
+from django_filters.utils import verbose_field_name
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -106,8 +108,10 @@ class InvoiceItemSerializer(ModelSerializer):
 class InvoiceListSerializer(ModelSerializer):
     """For listview only"""
 
-    warehouse = WarehouseSerializer()
-    stakeholder = StakeholderBasicSerializer()
+    created_by = ConciseUserSerializer(label=_("Created by"))
+    updated_by = ConciseUserSerializer(label=_("Updated by"))
+    warehouse = WarehouseSerializer(label=_("Depot"))
+    stakeholder = StakeholderBasicSerializer(label=_("Stakeholder"))
 
     class Meta:
         model = models.Invoice
@@ -128,27 +132,45 @@ class InvoiceListSerializer(ModelSerializer):
             "warehouse",
         ]
 
-class InvoiceConditionSerializerIn(ModelSerializer):
-    id = serializers.UUIDField(required=False)
-    class Meta:
-        model = models.InvoiceCondition
-        fields = ['id', 'condition_name', 'conditions']
-        extra_kwargs = {
-            'condition_name': {'validators': []},
-        }
 
-class InvoiceConditionSerializerOut(ModelSerializer):
+class InvoiceConditionSerializerIn(ModelSerializer):
     created_by = serializers.HiddenField(default=CurrentUserDefault())
     updated_by = serializers.HiddenField(default=CurrentUserDefault())
+    field_overrides = {
+        "conditions": {"component": "rich-editor", "props": {"label": _("Content of the invoice condition")}},
+    }
 
     class Meta:
         model = models.InvoiceCondition
-        fields = ['id', 'condition_name', 'conditions', 'created_by', 'updated_by', 'created_at', 'updated_at']
+        fields = ["id", "condition_name", "conditions", "created_by", "updated_by"]
+        extra_kwargs = {
+            "condition_name": {"validators": []},
+        }
+
+class InvoiceConditionWithIdSerializerIn(InvoiceConditionSerializerIn):
+    id = serializers.UUIDField(required=False)
+
+
+class InvoiceConditionSerializerOut(InvoiceConditionSerializerIn):
+    created_by = ConciseUserSerializer(label=_("Created by"))
+    updated_by = ConciseUserSerializer(label=_("Updated by"))
+
+    class Meta:
+        model = models.InvoiceCondition
+        fields = [
+            "id",
+            "condition_name",
+            "conditions",
+            "created_by",
+            "updated_by",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
     # TODO: items should have an order field and they should be ordered by that
-    invoice_conditions = InvoiceConditionSerializerIn(required=False)
+    invoice_conditions = InvoiceConditionWithIdSerializerIn(required=False)
     field_overrides = {
         "warehouse": {"component": "warehouse-selector"},
     }
@@ -173,10 +195,12 @@ class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
         invoice_conditions = validated_data.pop("invoice_conditions", None)
         items_data = validated_data.pop("items")
         invoice: models.Invoice = super().create(validated_data)
-        if (invoice_conditions and invoice_conditions.get('id')):
-            invoice.invoice_conditions_id = invoice_conditions.get('id')
+        if invoice_conditions and invoice_conditions.get("id"):
+            invoice.invoice_conditions_id = invoice_conditions.get("id")
         elif invoice_conditions:
-            invoice_conditions = models.InvoiceCondition.objects.create(**invoice_conditions)
+            invoice_conditions = models.InvoiceCondition.objects.create(
+                **invoice_conditions
+            )
             invoice.invoice_conditions_id = invoice_conditions.id
             invoice.save()
         else:
@@ -204,10 +228,12 @@ class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
 
         updated_item_ids = []
 
-        if invoice_conditions and invoice_conditions.get('id'):
-            invoice.invoice_conditions_id = invoice_conditions.get('id')
+        if invoice_conditions and invoice_conditions.get("id"):
+            invoice.invoice_conditions_id = invoice_conditions.get("id")
         elif invoice_conditions:
-            invoice_conditions = models.InvoiceCondition.objects.create(**invoice_conditions)
+            invoice_conditions = models.InvoiceCondition.objects.create(
+                **invoice_conditions
+            )
             invoice.invoice_conditions_id = invoice_conditions.id
         else:
             invoice.invoice_conditions = None
@@ -221,7 +247,7 @@ class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
             item["stock_movement"]["warehouse_item_stock"]["warehouse"] = warehouse
             if item.get("id"):
                 updated_items.append(item)
-                updated_item_ids.append(item.get('id'))
+                updated_item_ids.append(item.get("id"))
             else:
                 created_items.append(item)
 
@@ -283,7 +309,7 @@ class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
             "total_with_tax",
             "items",
             "related_invoice",
-            "invoice_conditions"
+            "invoice_conditions",
         ]
 
 
