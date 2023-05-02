@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-02 04:51+0300\n"
+"POT-Creation-Date: 2023-05-02 05:26+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,13 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: .\inventory\models.py:17 .\inventory\models.py:87 .\inventory\views.py:54
+#: .\inventory\models.py:17 .\inventory\models.py:87
+#: .\inventory\serializers.py:130 .\inventory\views.py:54
 msgid "Category"
 msgstr "Kategori"
 
-#: .\inventory\models.py:29 .\inventory\models.py:94 .\inventory\views.py:85
+#: .\inventory\models.py:29 .\inventory\models.py:94
+#: .\inventory\serializers.py:129 .\inventory\views.py:85
 msgid "Stock unit"
 msgstr "Birim"
 
@@ -86,6 +88,20 @@ msgstr "Plaka numarası"
 msgid "Amount"
 msgstr "Miktar"
 
+#: .\inventory\serializers.py:131 .\inventory\views.py:103
+#: .\invoice\serializers.py:111 .\invoice\serializers.py:155
+#: .\invoice\views.py:38 .\invoice\views.py:126
+#: .\utilities\common_model_mixins.py:12
+msgid "Created by"
+msgstr "Oluşturan"
+
+#: .\inventory\serializers.py:132 .\inventory\views.py:109
+#: .\invoice\serializers.py:112 .\invoice\serializers.py:156
+#: .\invoice\views.py:44 .\invoice\views.py:132
+#: .\utilities\common_model_mixins.py:20
+msgid "Updated by"
+msgstr "Güncelleyen"
+
 #: .\inventory\views.py:59
 msgid "Show categoryless"
 msgstr "Kategorisizleri göster"
@@ -99,16 +115,6 @@ msgstr "Oluşturulma tarihi"
 #: .\utilities\common_model_mixins.py:30
 msgid "Updated at"
 msgstr "Güncelleme tarihi"
-
-#: .\inventory\views.py:103 .\invoice\views.py:38 .\invoice\views.py:126
-#: .\utilities\common_model_mixins.py:12
-msgid "Created by"
-msgstr "Oluşturan"
-
-#: .\inventory\views.py:109 .\invoice\views.py:44 .\invoice\views.py:132
-#: .\utilities\common_model_mixins.py:20
-msgid "Updated by"
-msgstr "Güncelleyen"
 
 #: .\inventory\views.py:116
 msgid "Show inactivated Items/Services"
@@ -162,11 +168,11 @@ msgstr "Vergisiz toplam"
 msgid "Total with tax"
 msgstr "Vergiler dahil toplam"
 
-#: .\invoice\models.py:71
+#: .\invoice\models.py:71 .\invoice\serializers.py:114
 msgid "Stakeholder"
 msgstr "Alakalı taraf"
 
-#: .\invoice\models.py:78
+#: .\invoice\models.py:78 .\invoice\serializers.py:113
 #, fuzzy
 #| msgid "Depot name"
 msgid "Depot"
@@ -196,7 +202,7 @@ msgstr "Stok hareketi"
 msgid "Price"
 msgstr "Fiyat"
 
-#: .\invoice\serializers.py:139
+#: .\invoice\serializers.py:140
 #, fuzzy
 #| msgid "Invoice item"
 msgid "Content of the invoice condition"

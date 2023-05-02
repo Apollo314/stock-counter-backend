@@ -3,7 +3,6 @@ from typing import OrderedDict
 
 from django.db import IntegrityError
 from django.utils.translation import gettext_lazy as _
-from django_filters.utils import verbose_field_name
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
