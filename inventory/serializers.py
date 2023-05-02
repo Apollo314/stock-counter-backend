@@ -1,16 +1,14 @@
 from typing import Any, OrderedDict
 
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from inventory import models
 from users.serializers import ConciseUserSerializer
 from utilities.serializer_helpers import CurrentUserDefault
 from utilities.serializermixins import UniqueFieldsMixin
-from utilities.serializers import (
-    DynamicFieldsModelSerializer,
-    ModelSerializer,
-    UpdateListSerializer,
-)
+from utilities.serializers import (DynamicFieldsModelSerializer,
+                                   ModelSerializer, UpdateListSerializer)
 
 
 class SimpleCategorySerializer(ModelSerializer):
@@ -128,10 +126,10 @@ class ItemInSerializer(DynamicFieldsModelSerializer):
 
 
 class ItemOutSerializer(ItemInSerializer):
-    stock_unit = StockUnitSerializer()
-    category = CategorySerializer(required=False)
-    created_by = ConciseUserSerializer()
-    updated_by = ConciseUserSerializer()
+    stock_unit = StockUnitSerializer(label=_("Stock unit"))
+    category = CategorySerializer(required=False, label=_("Category"))
+    created_by = ConciseUserSerializer(label=_("Created by"))
+    updated_by = ConciseUserSerializer(label=_("Updated by"))
 
 
 class ItemDetailSerializer(ItemOutSerializer):
