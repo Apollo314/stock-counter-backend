@@ -56,7 +56,11 @@ class InvoiceViewset(ModelViewSet):
         if self.action == "retrieve":
             queryset = (
                 models.Invoice.objects.select_related(
-                    "created_by", "updated_by", "warehouse", "stakeholder", "invoice_conditions"
+                    "created_by",
+                    "updated_by",
+                    "warehouse",
+                    "stakeholder",
+                    "invoice_conditions",
                 )
                 .prefetch_related(
                     Prefetch(
@@ -72,7 +76,11 @@ class InvoiceViewset(ModelViewSet):
             )
         else:
             queryset = models.Invoice.objects.select_related(
-                "created_by", "updated_by", "warehouse", "stakeholder", "invoice_conditions"
+                "created_by",
+                "updated_by",
+                "warehouse",
+                "stakeholder",
+                "invoice_conditions",
             ).all()
         return queryset
 
@@ -87,7 +95,9 @@ class InvoiceViewset(ModelViewSet):
 
 
 class InvoiceConditionViewset(ModelViewSet):
-    queryset = models.InvoiceCondition.objects.select_related("created_by", "updated_by").all()
+    queryset = models.InvoiceCondition.objects.select_related(
+        "created_by", "updated_by"
+    ).all()
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     ordering_fields = [
         "condition_name",
@@ -122,18 +132,10 @@ class InvoiceConditionViewset(ModelViewSet):
                 "props": {"label": _("Updated by")},
             }
         },
-        "condition_name": {
-            "icontains": {
-                "component": "hidden",
-                "props": {}
-            }
-        },
+        "condition_name": {"icontains": {"component": "hidden", "props": {}}},
         "conditions": {
-            "icontains": {
-                "component": "text-input",
-                "props": {"label": _("Contents")}
-            }
-        }
+            "icontains": {"component": "text-input", "props": {"label": _("Contents")}}
+        },
     }
     search_fields = ["condition_name"]
 
@@ -143,5 +145,3 @@ class InvoiceConditionViewset(ModelViewSet):
         else:
             serializer_class = serializers.InvoiceConditionSerializerOut
         return serializer_class
-
-

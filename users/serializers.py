@@ -5,6 +5,7 @@ from utilities.serializers import ModelSerializer
 
 from .models import User
 
+
 class GroupSerializer(ModelSerializer):
     class Meta:
         model = Group
@@ -15,6 +16,7 @@ class GroupDetailSerializer(ModelSerializer):
     class Meta:
         model = Group
         fields = ("id", "name", "permissions")
+
 
 class UserSerializer(ModelSerializer):
     groups = GroupSerializer(many=True, required=False)

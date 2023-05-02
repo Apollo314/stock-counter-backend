@@ -40,74 +40,86 @@ class StockUnitViewset(ModelViewSet):
     search_fields = ["name"]
 
 
-
 class ItemFilter(django_filters.FilterSet):
-    id__notin = django_filters.BaseInFilter(field_name="id", lookup_expr="in", exclude=True)
+    id__notin = django_filters.BaseInFilter(
+        field_name="id", lookup_expr="in", exclude=True
+    )
+
     class Meta:
         model = models.Item
         fields = {
-        "category": {
-            "in": {
-                "component": "multi-category-selector",
-                "props": {"label": _("Category")},
-            },
-            "isnull": {
-                "component": "checkbox",
-                "props": {
-                    "label": _("Show categoryless"),
-                    "toggleIndeterminate": True,
+            "category": {
+                "in": {
+                    "component": "multi-category-selector",
+                    "props": {"label": _("Category")},
+                },
+                "isnull": {
+                    "component": "checkbox",
+                    "props": {
+                        "label": _("Show categoryless"),
+                        "toggleIndeterminate": True,
+                    },
                 },
             },
-        },
-        "buyprice": {
-            "range": {"component": "money-range", "props": {"label": _("Buy price")}}
-        },
-        "sellprice": {
-            "range": {"component": "money-range", "props": {"label": _("Sell price")}}
-        },
-        "barcode": {
-            "exact": {"component": "barcode-scanner", "props": {"label": _("Barcode")}}
-        },
-        "stock_unit": {
-            "in": {
-                "component": "multi-stockunit-selector",
-                "props": {"label": _("Stock unit")},
-            }
-        },
-        "created_at": {
-            "range": {
-                "component": "date-time-range",
-                "props": {"label": _("Created at")},
-            }
-        },
-        "updated_at": {
-            "range": {
-                "component": "date-time-range",
-                "props": {"label": _("Updated at")},
-            }
-        },
-        "created_by": {
-            "exact": {
-                "component": "user-select",
-                "props": {"label": _("Created by")},
-            }
-        },
-        "updated_by": {
-            "exact": {
-                "component": "user-select",
-                "props": {"label": _("Updated by")},
-            }
-        },
-        "inactivated": {
-            "exact": {
-                "component": "checkbox",
-                "props": {
-                    "label": _("Show inactivated Items/Services"),
-                    "toggleIndeterminate": True,
-                },
-            }
-        },
-    }
+            "buyprice": {
+                "range": {
+                    "component": "money-range",
+                    "props": {"label": _("Buy price")},
+                }
+            },
+            "sellprice": {
+                "range": {
+                    "component": "money-range",
+                    "props": {"label": _("Sell price")},
+                }
+            },
+            "barcode": {
+                "exact": {
+                    "component": "barcode-scanner",
+                    "props": {"label": _("Barcode")},
+                }
+            },
+            "stock_unit": {
+                "in": {
+                    "component": "multi-stockunit-selector",
+                    "props": {"label": _("Stock unit")},
+                }
+            },
+            "created_at": {
+                "range": {
+                    "component": "date-time-range",
+                    "props": {"label": _("Created at")},
+                }
+            },
+            "updated_at": {
+                "range": {
+                    "component": "date-time-range",
+                    "props": {"label": _("Updated at")},
+                }
+            },
+            "created_by": {
+                "exact": {
+                    "component": "user-select",
+                    "props": {"label": _("Created by")},
+                }
+            },
+            "updated_by": {
+                "exact": {
+                    "component": "user-select",
+                    "props": {"label": _("Updated by")},
+                }
+            },
+            "inactivated": {
+                "exact": {
+                    "component": "checkbox",
+                    "props": {
+                        "label": _("Show inactivated Items/Services"),
+                        "toggleIndeterminate": True,
+                    },
+                }
+            },
+        }
+
 
 class ItemViewset(ModelViewSet):
     queryset = (

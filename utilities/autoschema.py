@@ -1,7 +1,9 @@
 import logging
 
-from drf_spectacular.extensions import (OpenApiFilterExtension,
-                                        OpenApiSerializerFieldExtension)
+from drf_spectacular.extensions import (
+    OpenApiFilterExtension,
+    OpenApiSerializerFieldExtension,
+)
 from drf_spectacular.openapi import AutoSchema as AutoSchema_
 from drf_spectacular.plumbing import ResolvedComponent
 

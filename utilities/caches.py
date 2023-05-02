@@ -1,5 +1,5 @@
 from _thread import RLock
-from typing import Any, Callable, Type 
+from typing import Any, Callable, Type
 import warnings
 
 from django.core.cache import cache

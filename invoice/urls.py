@@ -15,5 +15,3 @@ urlpatterns = [
     path("", include(router.urls)),
     path("bulk/", include(url_patterns)),
 ]
-
-

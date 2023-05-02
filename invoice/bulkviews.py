@@ -9,6 +9,7 @@ class BulkInvoiceViews(BulkDeleteMixin, generics.GenericAPIView):
     serializer_class = invoice_serializers.InvoiceListSerializer
     queryset = models.Invoice.objects.all()
 
+
 class BulkInvoiceConditionsViews(BulkDeleteMixin, generics.GenericAPIView):
     serializer_class = invoice_serializers.InvoiceConditionSerializerIn
     queryset = models.InvoiceCondition.objects.all()

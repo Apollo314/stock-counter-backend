@@ -31,7 +31,9 @@ class LoginSerializer(serializers.Serializer):
             # users. (Assuming the default ModelBackend authentication
             # backend.)
             if not user:
-                msg = _("Couldn't login with the given information. Password or Username may be wrong.")
+                msg = _(
+                    "Couldn't login with the given information. Password or Username may be wrong."
+                )
                 raise serializers.ValidationError(msg, code="authorization")
         else:
             msg = "Kullanıcı adı ve şifre girilmeli."
