@@ -8,15 +8,17 @@ from knox.models import AuthToken
 from knox.settings import knox_settings
 from knox.views import LoginView as KnoxLoginView
 from rest_framework import permissions, status
-from rest_framework.authentication import (BaseAuthentication,
-                                           get_authorization_header)
+from rest_framework.authentication import BaseAuthentication, get_authorization_header
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from users.knox_serializers import (LoginSerializer, LogoutAllSerializer,
-                                    LogoutSerializer)
+from users.knox_serializers import (
+    LoginSerializer,
+    LogoutAllSerializer,
+    LogoutSerializer,
+)
 from users.serializers import UserSerializer
 
 

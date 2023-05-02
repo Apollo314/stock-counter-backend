@@ -8,8 +8,11 @@ from rest_framework.response import Response
 from rest_framework.test import APIClient, APIRequestFactory
 
 from inventory.models import Item, StockUnit, Warehouse, WarehouseItemStock
-from inventory.serializers import (ItemInSerializer, ItemOutSerializer,
-                                   WarehouseSerializer)
+from inventory.serializers import (
+    ItemInSerializer,
+    ItemOutSerializer,
+    WarehouseSerializer,
+)
 from stakeholder.models import Stakeholder, StakeholderRole
 from stakeholder.serializers import StakeholderSerializer
 from users.models import User

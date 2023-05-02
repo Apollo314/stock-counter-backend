@@ -15,12 +15,20 @@ from utilities.enums import Currency, InvoiceType
 class InvoiceCondition(CreateUpdateInfo):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     conditions: str = models.TextField(_("Invoice conditions"))
-    condition_name: str = models.CharField(_("Condition identifier name(ex: Default conditions)"), unique=True, max_length=100)
-    hidden: bool = models.BooleanField(_("Hide from list view(will persist in invoices that uses this)"), default=False)
+    condition_name: str = models.CharField(
+        _("Condition identifier name(ex: Default conditions)"),
+        unique=True,
+        max_length=100,
+    )
+    hidden: bool = models.BooleanField(
+        _("Hide from list view(will persist in invoices that uses this)"), default=False
+    )
+
 
 def week_from_now():
     now = timezone.now()
     return now + timedelta(weeks=1)
+
 
 class Invoice(CreateUpdateInfo):
     invoice_type: InvoiceType = models.CharField(
@@ -34,7 +42,7 @@ class Invoice(CreateUpdateInfo):
         verbose_name=_("Invoice Conditions"),
         related_name="invoices",
         null=True,
-        blank=True
+        blank=True,
     )
     last_payment_date: datetime = models.DateTimeField(
         _("Last payment date"), default=week_from_now
@@ -46,7 +54,11 @@ class Invoice(CreateUpdateInfo):
         default=Currency.turkish_lira,
     )
     currency_exchange_rate: Decimal = models.DecimalField(
-        _("Currency exchange rate"), max_digits=19, decimal_places=4, null=True, blank=True
+        _("Currency exchange rate"),
+        max_digits=19,
+        decimal_places=4,
+        null=True,
+        blank=True,
     )
     total: Decimal = models.DecimalField(
         _("Total without tax"), max_digits=19, decimal_places=4, null=True, blank=True

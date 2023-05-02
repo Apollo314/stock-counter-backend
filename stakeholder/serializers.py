@@ -39,5 +39,5 @@ class StakeholderBasicSerializer(ModelSerializer):
             "phone",
             "email",
             "vkntckn",
-            "address"
+            "address",
         ]

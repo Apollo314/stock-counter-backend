@@ -42,7 +42,6 @@ def get_item_image_location(instance: "Item", filename: str):
     path = Path("item_images") / f"{instance.name}_{instance.id}{f.suffix}"
     return path
 
-
 class Item(CreateUpdateInfo, InactivatedMixin):
     name: str = models.CharField(_("Item/Service"), max_length=200, unique=True)
     description: str = models.CharField(
@@ -96,7 +95,7 @@ class Item(CreateUpdateInfo, InactivatedMixin):
         on_delete=models.PROTECT,
     )
 
-    history = HistoricalRecords()
+    history: models.Manager = HistoricalRecords()
 
     stocks: QuerySet["WarehouseItemStock"]  # reverse foreign key
 
