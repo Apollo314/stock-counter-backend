@@ -60,7 +60,7 @@ class InvoiceViewset(ModelViewSet):
                     "updated_by",
                     "warehouse",
                     "stakeholder",
-                    "invoice_conditions",
+                    "invoice_condition__invoice_condition_template",
                 )
                 .prefetch_related(
                     Prefetch(
@@ -70,7 +70,7 @@ class InvoiceViewset(ModelViewSet):
                             "stock_movement__warehouse_item_stock",
                             "stock_movement__warehouse_item_stock__item",
                         ),
-                    )
+                    ),
                 )
                 .all()
             )
@@ -80,7 +80,7 @@ class InvoiceViewset(ModelViewSet):
                 "updated_by",
                 "warehouse",
                 "stakeholder",
-                "invoice_conditions",
+                "invoice_condition__invoice_condition_template",
             ).all()
         return queryset
 
@@ -94,8 +94,8 @@ class InvoiceViewset(ModelViewSet):
         return serializer_class
 
 
-class InvoiceConditionViewset(ModelViewSet):
-    queryset = models.InvoiceCondition.objects.select_related(
+class InvoiceConditionTemplateViewset(ModelViewSet):
+    queryset = models.InvoiceConditionTemplate.objects.select_related(
         "created_by", "updated_by"
     ).all()
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
@@ -141,7 +141,7 @@ class InvoiceConditionViewset(ModelViewSet):
 
     def get_serializer_class(self):
         if self.action in ["create", "update"]:
-            serializer_class = serializers.InvoiceConditionSerializerIn
+            serializer_class = serializers.InvoiceConditionTemplateInSerializer
         else:
-            serializer_class = serializers.InvoiceConditionSerializerOut
+            serializer_class = serializers.InvoiceConditionTemplateOutSerializer
         return serializer_class

@@ -12,16 +12,13 @@ from utilities.common_model_mixins import CreateUpdateInfo
 from utilities.enums import Currency, InvoiceType
 
 
-class InvoiceCondition(CreateUpdateInfo):
+class InvoiceConditionTemplate(CreateUpdateInfo):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     conditions: str = models.TextField(_("Invoice conditions"))
     condition_name: str = models.CharField(
-        _("Condition identifier name(ex: Default conditions)"),
+        _("Condition identifier name (ex: Default conditions)"),
         unique=True,
         max_length=100,
-    )
-    hidden: bool = models.BooleanField(
-        _("Hide from list view(will persist in invoices that uses this)"), default=False
     )
 
 
@@ -36,14 +33,6 @@ class Invoice(CreateUpdateInfo):
     )
     name: str = models.CharField(_("Invoice name"), max_length=100)
     description: str = models.TextField(_("Description"), null=True, blank=True)
-    invoice_conditions: InvoiceCondition = models.ForeignKey(
-        InvoiceCondition,
-        on_delete=models.PROTECT,
-        verbose_name=_("Invoice Conditions"),
-        related_name="invoices",
-        null=True,
-        blank=True,
-    )
     last_payment_date: datetime = models.DateTimeField(
         _("Last payment date"), default=week_from_now
     )
@@ -79,6 +68,7 @@ class Invoice(CreateUpdateInfo):
     )
 
     items: models.QuerySet["InvoiceItem"]
+    invoice_condition: models.QuerySet["InvoiceCondition"]
 
     related_invoice = models.ManyToManyField(
         "self",
@@ -93,6 +83,32 @@ class Invoice(CreateUpdateInfo):
 
     class Meta:
         permissions = [("view_all_invoices", _("Can view all invoices"))]
+
+
+class InvoiceCondition(models.Model):
+    """A copy of InvoiceConditionTemplate for a specific invoice.
+    it exists so that even if InvoiceConditionTemplate is changed, a permenant copy of it
+    persists for an invoice."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    invoice_condition_template: InvoiceConditionTemplate = models.ForeignKey(
+        InvoiceConditionTemplate,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Invoice Condition Template"),
+        related_name="invoice_conditions",
+        null=True,
+        blank=True
+    )
+
+    invoice: Invoice = models.OneToOneField(
+        Invoice,
+        on_delete=models.CASCADE,
+        verbose_name=_("Invoice"),
+        related_name="invoice_condition",
+    )
+
+    conditions: str = models.TextField(_("Invoice conditions"))
 
 
 class InvoiceItem(models.Model):
