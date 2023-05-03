@@ -11,5 +11,5 @@ class BulkInvoiceViews(BulkDeleteMixin, generics.GenericAPIView):
 
 
 class BulkInvoiceConditionsViews(BulkDeleteMixin, generics.GenericAPIView):
-    serializer_class = invoice_serializers.InvoiceConditionSerializerIn
-    queryset = models.InvoiceCondition.objects.all()
+    serializer_class = invoice_serializers.InvoiceConditionTemplateInSerializer
+    queryset = models.InvoiceConditionTemplate.objects.all()

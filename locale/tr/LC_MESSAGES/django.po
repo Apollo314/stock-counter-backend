@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-02 05:26+0300\n"
+"POT-Creation-Date: 2023-05-03 19:49+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,7 +32,7 @@ msgstr "Birim"
 msgid "Item/Service"
 msgstr "Ürün/Hizmet"
 
-#: .\inventory\models.py:48 .\invoice\models.py:38
+#: .\inventory\models.py:48 .\invoice\models.py:35
 msgid "Description"
 msgstr "Açıklama"
 
@@ -89,14 +89,14 @@ msgid "Amount"
 msgstr "Miktar"
 
 #: .\inventory\serializers.py:131 .\inventory\views.py:103
-#: .\invoice\serializers.py:111 .\invoice\serializers.py:155
+#: .\invoice\serializers.py:110 .\invoice\serializers.py:154
 #: .\invoice\views.py:38 .\invoice\views.py:126
 #: .\utilities\common_model_mixins.py:12
 msgid "Created by"
 msgstr "Oluşturan"
 
 #: .\inventory\serializers.py:132 .\inventory\views.py:109
-#: .\invoice\serializers.py:112 .\invoice\serializers.py:156
+#: .\invoice\serializers.py:111 .\invoice\serializers.py:155
 #: .\invoice\views.py:44 .\invoice\views.py:132
 #: .\utilities\common_model_mixins.py:20
 msgid "Updated by"
@@ -120,89 +120,93 @@ msgstr "Güncelleme tarihi"
 msgid "Show inactivated Items/Services"
 msgstr "İnaktif Ürün/Hizmetleri göster"
 
-#: .\invoice\models.py:17
+#: .\invoice\models.py:17 .\invoice\models.py:111
 #, fuzzy
 #| msgid "Invoice item"
 msgid "Invoice conditions"
 msgstr "Fatura koşulları"
 
 #: .\invoice\models.py:19
-msgid "Condition identifier name(ex: Default conditions)"
+#, fuzzy
+#| msgid "Condition identifier name(ex: Default conditions)"
+msgid "Condition identifier name (ex: Default conditions)"
 msgstr "Fatura koşulu tanımlayıcı (ör: Standart koşullar)"
 
-#: .\invoice\models.py:24
-msgid "Hide from list view(will persist in invoices that uses this)"
-msgstr "Koşulu gizle. (halihazırda kullanan faturalarda kalmaya devam eder)"
-
-#: .\invoice\models.py:35
+#: .\invoice\models.py:32
 msgid "Invoice type"
 msgstr "Fatura tipi"
 
-#: .\invoice\models.py:37
+#: .\invoice\models.py:34
 msgid "Invoice name"
 msgstr "Fatura adı"
 
-#: .\invoice\models.py:42
-#, fuzzy
-#| msgid "Invoice item"
-msgid "Invoice Conditions"
-msgstr "Fatura koşulları"
-
-#: .\invoice\models.py:48
+#: .\invoice\models.py:37
 msgid "Last payment date"
 msgstr "Son ödeme tarihi"
 
-#: .\invoice\models.py:51
+#: .\invoice\models.py:40
 msgid "Invoice currency"
 msgstr "Fatura para birimi"
 
-#: .\invoice\models.py:57
+#: .\invoice\models.py:46
 msgid "Currency exchange rate"
 msgstr "Fatura döviz kuru"
 
-#: .\invoice\models.py:64
+#: .\invoice\models.py:53
 msgid "Total without tax"
 msgstr "Vergisiz toplam"
 
-#: .\invoice\models.py:67
+#: .\invoice\models.py:56
 msgid "Total with tax"
 msgstr "Vergiler dahil toplam"
 
-#: .\invoice\models.py:71 .\invoice\serializers.py:114
+#: .\invoice\models.py:60 .\invoice\serializers.py:113
 msgid "Stakeholder"
 msgstr "Alakalı taraf"
 
-#: .\invoice\models.py:78 .\invoice\serializers.py:113
+#: .\invoice\models.py:67 .\invoice\serializers.py:112
 #, fuzzy
 #| msgid "Depot name"
 msgid "Depot"
 msgstr "Depo adı"
 
-#: .\invoice\models.py:85
+#: .\invoice\models.py:75
 msgid "Related invoices"
 msgstr "Alakalı faturalar"
 
-#: .\invoice\models.py:95
+#: .\invoice\models.py:85
 #, fuzzy
 #| msgid "View all invoices"
 msgid "Can view all invoices"
 msgstr "Tüm faturaları görüntüleme"
 
-#: .\invoice\models.py:102
+#: .\invoice\models.py:98
+#, fuzzy
+#| msgid "Invoice item"
+msgid "Invoice Condition Template"
+msgstr "Fatura koşulları"
+
+#: .\invoice\models.py:107
+#, fuzzy
+#| msgid "Invoice type"
+msgid "Invoice"
+msgstr "Fatura tipi"
+
+#: .\invoice\models.py:118
 #, fuzzy
 #| msgid "Related invoices"
 msgid "Related Invoice"
 msgstr "Alakalı faturalar"
 
-#: .\invoice\models.py:108
+#: .\invoice\models.py:124
 msgid "Stock movement"
 msgstr "Stok hareketi"
 
-#: .\invoice\models.py:111
+#: .\invoice\models.py:127
 msgid "Price"
 msgstr "Fiyat"
 
-#: .\invoice\serializers.py:140
+#: .\invoice\serializers.py:139 .\invoice\serializers.py:176
 #, fuzzy
 #| msgid "Invoice item"
 msgid "Content of the invoice condition"
@@ -228,3 +232,8 @@ msgstr "Parola"
 msgid ""
 "Couldn't login with the given information. Password or Username may be wrong."
 msgstr "Verilen bilgilerle giriş yapılamadı. Kontrol ederek yeniden giriniz."
+
+#, fuzzy
+#~| msgid "Hide from list view(will persist in invoices that uses this)"
+#~ msgid "Hide from list view (will persist in invoices that uses this)"
+#~ msgstr "Koşulu gizle. (halihazırda kullanan faturalarda kalmaya devam eder)"
