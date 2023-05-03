@@ -193,17 +193,14 @@ class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
         validated_data = calculate_total(validated_data)
         invoice_conditions = validated_data.pop("invoice_conditions", None)
         items_data = validated_data.pop("items")
-        invoice: models.Invoice = super().create(validated_data)
         if invoice_conditions and invoice_conditions.get("id"):
-            invoice.invoice_conditions_id = invoice_conditions.get("id")
+            validated_data['invoice_conditions_id'] = invoice_conditions.get("id")
         elif invoice_conditions:
             invoice_conditions = models.InvoiceCondition.objects.create(
                 **invoice_conditions
             )
-            invoice.invoice_conditions_id = invoice_conditions.id
-            invoice.save()
-        else:
-            invoice.invoice_conditions = None
+            validated_data['invoice_conditions'] = invoice_conditions
+        invoice: models.Invoice = super().create(validated_data)
         warehouse = validated_data.get("warehouse")
         for item in items_data:
             item["invoice_id"] = invoice.id
@@ -233,7 +230,7 @@ class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
             invoice_conditions = models.InvoiceCondition.objects.create(
                 **invoice_conditions
             )
-            invoice.invoice_conditions_id = invoice_conditions.id
+            invoice.invoice_conditions = invoice_conditions
         else:
             invoice.invoice_conditions = None
 
