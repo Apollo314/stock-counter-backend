@@ -165,16 +165,23 @@ class InvoiceConditionTemplateOutSerializer(InvoiceConditionTemplateInSerializer
             "created_at",
             "updated_at",
         ]
-
+        
 class InvoiceConditionInSerializer(ModelSerializer):
     id = serializers.UUIDField(required=False)
 
     # well it's actually required but we'll give it from InvoiceDetailInSerializer
-    invoice = serializers.IntegerField(required=False, write_only=True)
+    invoice = serializers.IntegerField(required=False, write_only=True, label=_("Invoice"))
+    invoice_condition_template = InvoiceConditionTemplateWithIdSerializer(label=_("Invoice Condition Template"))
 
     field_overrides = {
         "conditions": {"component": "rich-editor", "props": {"label": _("Content of the invoice condition")}},
     }
+
+    def create(self, validated_data):
+        invoice_condition_template = validated_data.pop('invoice_condition_template', None)
+        if invoice_condition_template:
+            validated_data['invoice_condition_template_id'] = invoice_condition_template.get('id')
+        return super().create(validated_data)
 
     class Meta:
         model = models.InvoiceCondition
@@ -209,9 +216,8 @@ class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
         items_data = validated_data.pop("items")
         invoice: models.Invoice = super().create(validated_data)
         if invoice_condition:
-            validated_data['invoice_condition'] = models.InvoiceCondition.objects.create(
-                **invoice_condition,
-                invoice_id=invoice.id
+            validated_data['invoice_condition'] = InvoiceConditionInSerializer().create(
+                {**invoice_condition, "invoice_id":invoice.id}
             )
         warehouse = validated_data.get("warehouse")
         for item in items_data:
@@ -237,12 +243,14 @@ class InvoiceDetailInSerializer(DynamicFieldsModelSerializer):
         updated_item_ids = []
 
         if not hasattr(invoice, 'invoice_condition'):
-            validated_data['invoice_condition'] = models.InvoiceCondition.objects.create(
-                **invoice_condition,
-                invoice_id=invoice.id
+            validated_data['invoice_condition'] = InvoiceConditionInSerializer().create(
+                {**invoice_condition, "invoice_id":invoice.id}
             )
-        elif invoice.invoice_condition.conditions != invoice_condition.get('conditions'):
-            invoice.invoice_condition.conditions = invoice_condition.get('conditions')
+        else:
+            if invoice.invoice_condition.conditions != invoice_condition.get('conditions'):
+                invoice.invoice_condition.conditions = invoice_condition.get('conditions')
+            if invoice.invoice_condition.invoice_condition_template != invoice_condition.get('invoice_condition_template'):
+                invoice.invoice_condition.invoice_condition_template_id = invoice_condition.get('invoice_condition_template').get('id')
             invoice.invoice_condition.save()
 
         for item in items_data:
