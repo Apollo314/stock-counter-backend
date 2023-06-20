@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-03 19:49+0300\n"
+"POT-Creation-Date: 2023-06-19 07:07+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -180,13 +180,13 @@ msgstr "Alakalı faturalar"
 msgid "Can view all invoices"
 msgstr "Tüm faturaları görüntüleme"
 
-#: .\invoice\models.py:98
+#: .\invoice\models.py:98 .\invoice\serializers.py:174
 #, fuzzy
 #| msgid "Invoice item"
 msgid "Invoice Condition Template"
 msgstr "Fatura koşulları"
 
-#: .\invoice\models.py:107
+#: .\invoice\models.py:107 .\invoice\serializers.py:173
 #, fuzzy
 #| msgid "Invoice type"
 msgid "Invoice"
@@ -206,7 +206,7 @@ msgstr "Stok hareketi"
 msgid "Price"
 msgstr "Fiyat"
 
-#: .\invoice\serializers.py:139 .\invoice\serializers.py:176
+#: .\invoice\serializers.py:139 .\invoice\serializers.py:177
 #, fuzzy
 #| msgid "Invoice item"
 msgid "Content of the invoice condition"
@@ -228,7 +228,11 @@ msgstr "Kullanıcı adı"
 msgid "Password"
 msgstr "Parola"
 
-#: .\users\knox_serializers.py:35
+#: .\users\knox_serializers.py:19
+msgid "Remember me"
+msgstr "Beni hatırla"
+
+#: .\users\knox_serializers.py:38
 msgid ""
 "Couldn't login with the given information. Password or Username may be wrong."
 msgstr "Verilen bilgilerle giriş yapılamadı. Kontrol ederek yeniden giriniz."

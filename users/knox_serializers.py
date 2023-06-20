@@ -15,6 +15,9 @@ class LoginSerializer(serializers.Serializer):
         write_only=True,
     )
     user = UserSerializer(read_only=True)
+    remember_me = serializers.BooleanField(
+        label=_("Remember me"), required=False, default=False
+    )
 
     def validate(self, attrs):
         username = attrs.get("username")
