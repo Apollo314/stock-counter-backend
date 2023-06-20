@@ -50,12 +50,13 @@ class LoginView(KnoxLoginView):
         _, token = AuthToken.objects.create(user, token_ttl)
         user_logged_in.send(sender=user.__class__, request=request, user=user)
         res = Response(serializer.data)
+        max_age = 1000000 if serializer.data["remember_me"] else None
         res.set_cookie(
             knox_settings.AUTH_HEADER_PREFIX,
             token,
             # samesite="None",
             # secure=True,
-            max_age=1000000,
+            max_age=max_age,
             httponly=True,
         )
         return res
