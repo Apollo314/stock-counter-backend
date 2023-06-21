@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "simple_history",
     "drf_spectacular",
     "drf_standardized_errors",
+    "django_extensions",
     # auth
     "knox",
     "users.apps.UsersConfig",
@@ -52,7 +53,7 @@ INSTALLED_APPS = [
     "inventory.apps.InventoryConfig",
     "stakeholder.apps.StakeholderConfig",
     "invoice.apps.InvoiceConfig",
-    "django_extensions",
+    "payments.apps.PaymentsConfig",
 ]
 
 MIDDLEWARE = [

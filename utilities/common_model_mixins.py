@@ -54,7 +54,7 @@ class InactivatedMixin(models.Model):
     which doesn't do filtering.
     default manager is active_objects."""
 
-    inactivated: bool = models.BooleanField("Gizli", default=False)
+    inactivated: bool = models.BooleanField(_("Inactivated"), default=False)
 
     active_objects: FilterOutInactiveObjectsManager = FilterOutInactiveObjectsManager()
     inactive_objects: FilterOutActiveObjectsManager = FilterOutActiveObjectsManager()
