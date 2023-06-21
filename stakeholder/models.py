@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class StakeholderRole(models.TextChoices):
@@ -36,13 +37,13 @@ class CustomerManager(models.Manager):
 
 
 class Stakeholder(models.Model):
-    role = models.CharField("Rolü", choices=StakeholderRole.choices, max_length=30)
-    name = models.CharField("Tam Adı", max_length=400)
-    shortname = models.CharField("Kısa/Takma Adı", max_length=100)
-    phone = models.CharField("Telefon", null=True, blank=True, max_length=20)
-    email = models.EmailField("E-Posta", null=True, blank=True, max_length=100)
-    vkntckn = models.CharField("VKN/TCKN", max_length=40, null=True, blank=True)
-    address = models.CharField("Adres", max_length=1000, null=True, blank=True)
+    role = models.CharField(_("Role"), choices=StakeholderRole.choices, max_length=30)
+    name = models.CharField(_("Full name"), max_length=400)
+    shortname = models.CharField(_("Short name"), max_length=100)
+    phone = models.CharField(_("Phone"), null=True, blank=True, max_length=20)
+    email = models.EmailField(_("Email"), null=True, blank=True, max_length=100)
+    vkntckn = models.CharField(_("VKN/TCKN"), max_length=40, null=True, blank=True)
+    address = models.CharField(_("Address"), max_length=1000, null=True, blank=True)
 
     employees: models.QuerySet["StakeholderEmployee"]
 

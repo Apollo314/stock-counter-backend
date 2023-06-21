@@ -67,6 +67,8 @@ class Invoice(CreateUpdateInfo):
         verbose_name=_("Depot"),
     )
 
+    cash_payments: models.QuerySet["InvoiceCashPayment"]
+    cheque_payments: models.QuerySet["InvoiceChequePayment"]
     items: models.QuerySet["InvoiceItem"]
     invoice_condition: models.QuerySet["InvoiceCondition"]
 
@@ -98,7 +100,7 @@ class InvoiceCondition(models.Model):
         verbose_name=_("Invoice Condition Template"),
         related_name="invoice_conditions",
         null=True,
-        blank=True
+        blank=True,
     )
 
     invoice: Invoice = models.OneToOneField(
@@ -128,3 +130,6 @@ class InvoiceItem(models.Model):
 
     def __str__(self):
         return f"{self.invoice}: {self.stock_movement}"
+
+
+from payments.models import InvoiceCashPayment, InvoiceChequePayment
