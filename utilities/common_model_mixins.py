@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+
 # from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
@@ -14,6 +15,7 @@ class CreateUpdateInfo(models.Model):
         null=True,
         on_delete=models.SET_NULL,
         related_name="created_%(class)s",
+        editable=False,
     )
     updated_by: User = models.ForeignKey(
         User,
@@ -24,7 +26,10 @@ class CreateUpdateInfo(models.Model):
         related_name="updated_%(class)s",
     )
     created_at: timezone = models.DateTimeField(
-        default=timezone.now, verbose_name=_("Created at")
+        verbose_name=_("Created at"),
+        auto_now_add=True,
+        blank=True,
+        null=True,
     )
     updated_at: timezone = models.DateTimeField(
         verbose_name=_("Updated at"), auto_now=True, null=True, blank=True
