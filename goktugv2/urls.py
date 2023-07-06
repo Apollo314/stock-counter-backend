@@ -25,6 +25,7 @@ from drf_spectacular.views import (
 
 from inventory.urls import urlpatterns as inventory_urls
 from invoice.urls import urlpatterns as invoice_urls
+from payments.urls import urlpatterns as payments_urls
 from stakeholder.urls import urlpatterns as stakeholder_urls
 from users.urls import urlpatterns as users_urls
 
@@ -35,6 +36,7 @@ urlpatterns = [
     path("stakeholder/", include(stakeholder_urls)),
     path("invoice/", include(invoice_urls)),
     path("user/", include(users_urls)),
+    path("payments/", include(payments_urls)),
     # auth
     # schema
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

@@ -130,6 +130,3 @@ class InvoiceItem(models.Model):
 
     def __str__(self):
         return f"{self.invoice}: {self.stock_movement}"
-
-
-from payments.models import InvoiceCashPayment, InvoiceChequePayment

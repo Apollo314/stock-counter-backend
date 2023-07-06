@@ -1,8 +1,8 @@
-from utilities.filters import DjangoFilterBackend, OrderingFilter, SearchFilter
 from rest_framework import filters
 from rest_framework.viewsets import ModelViewSet
 
 from stakeholder import models, serializers
+from utilities.filters import DjangoFilterBackend, OrderingFilter, SearchFilter
 
 
 class SupplierViewset(ModelViewSet):
@@ -75,3 +75,10 @@ class StakeholderEmployeeViewset(ModelViewSet):
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ["name", "phone", "email"]
     # filterset_fields = ["position", "email", "phone"]
+
+
+class StakeholderViewset(ModelViewSet):
+    queryset = models.Stakeholder.objects.prefetch_related("employees").all()
+    serializer_class = serializers.StakeholderSerializer
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
+    search_fields = ["name", "phone", "email"]
