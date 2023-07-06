@@ -5,7 +5,8 @@ from rest_framework import serializers
 
 from inventory import models
 from users.serializers import ConciseUserSerializer
-from utilities.serializer_helpers import CurrentUserDefault
+from utilities.serializer_helpers import (CurrentUserCreatedBy,
+                                          CurrentUserDefault)
 from utilities.serializermixins import UniqueFieldsMixin
 from utilities.serializers import (DynamicFieldsModelSerializer,
                                    ModelSerializer, UpdateListSerializer)
@@ -88,7 +89,7 @@ class WarehouseItemStockSerializer(ModelSerializer):
 class ItemInSerializer(DynamicFieldsModelSerializer):
     # """For list actions like bulk update bulk delete..."""
     stocks = WarehouseItemStockSerializer(many=True, read_only=True)
-    created_by = serializers.HiddenField(default=CurrentUserDefault())
+    created_by = serializers.HiddenField(default=CurrentUserCreatedBy())
     updated_by = serializers.HiddenField(default=CurrentUserDefault())
     field_overrides = {
         "stock_unit": {"component": "unit-selector"},

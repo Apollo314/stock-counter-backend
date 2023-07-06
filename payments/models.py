@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -13,7 +15,9 @@ class Bank(CreateUpdateInfo, InactivatedMixin):
 
 class PaymentAccount(CreateUpdateInfo, InactivatedMixin):
     name = models.CharField(_("Payment account name"), max_length=50)
-    bank = models.ForeignKey(Bank, verbose_name=_("Bank"), on_delete=models.PROTECT)
+    bank = models.ForeignKey(
+        Bank, verbose_name=_("Bank"), on_delete=models.PROTECT, null=True, blank=True
+    )
     account_number = models.CharField(_("Account number"), null=True, blank=True)
     iban = models.CharField(_("IBAN"), null=True, blank=True)
     stakeholder = models.ForeignKey(
@@ -23,6 +27,9 @@ class PaymentAccount(CreateUpdateInfo, InactivatedMixin):
         blank=True,
         on_delete=models.CASCADE,
     )
+
+    class Meta:
+        unique_together = [["name", "bank", "stakeholder"]]
 
 
 class Payment(CreateUpdateInfo):
