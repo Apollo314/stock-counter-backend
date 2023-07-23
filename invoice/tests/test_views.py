@@ -81,11 +81,13 @@ class TestInvoice(TestCase):
             name="sh1", shortname="sh1", role=StakeholderRole.customer_and_supplier
         )
 
+    @staticmethod
     def create_invoice(
-        self,
         client: APIClient,
         items: list[Item],
         amounts: list[Decimal],
+        stakeholder: Stakeholder,
+        warehouse: Warehouse,
         invoice_type: InvoiceType = InvoiceType.purchase,
     ):
         url = reverse("invoice-list")
@@ -111,8 +113,8 @@ class TestInvoice(TestCase):
             {
                 "invoice_type": invoice_type,
                 "name": uuid4(),
-                "stakeholder": self.stakeholder.id,
-                "warehouse": self.warehouse.id,
+                "stakeholder": stakeholder.id,
+                "warehouse": warehouse.id,
                 "items": inventory_items,
             },
             format="json",
@@ -121,10 +123,12 @@ class TestInvoice(TestCase):
 
     def test_employee_can_create_invoice_and_it_increases_and_decreases_stocks(self):
         self.amounts = [Decimal(10), Decimal(20)]
-        res: Response = self.create_invoice(
+        res = TestInvoice.create_invoice(
             self.employee_client,
             items=[self.item1, self.item2],
             amounts=self.amounts,
+            stakeholder=self.stakeholder,
+            warehouse=self.warehouse,
         )
 
         # is invoice created?
@@ -136,10 +140,12 @@ class TestInvoice(TestCase):
 
         # create another invoice to see if it increases furthermore,
         # if cache isn't reset by creation of invoice, it would fail.
-        self.create_invoice(
+        TestInvoice.create_invoice(
             self.employee_client,
             items=[self.item1, self.item2],
             amounts=self.amounts,
+            stakeholder=self.stakeholder,
+            warehouse=self.warehouse,
         )
 
         # is warehouse item stock amount updated correctly?
@@ -147,11 +153,13 @@ class TestInvoice(TestCase):
         self.assertEqual(self.item2.stocks.first().amount, self.amounts[1] * 2)
 
         # create a different type of invoice to see if it decreases the amount
-        self.create_invoice(
+        TestInvoice.create_invoice(
             self.employee_client,
             items=[self.item1, self.item2],
             amounts=self.amounts,
             invoice_type=InvoiceType.sale,
+            stakeholder=self.stakeholder,
+            warehouse=self.warehouse,
         )
 
         # is warehouse item stock amount updated correctly?
