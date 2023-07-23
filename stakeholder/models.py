@@ -47,9 +47,9 @@ class Stakeholder(models.Model):
 
     employees: models.QuerySet["StakeholderEmployee"]
 
-    objects: models.Manager = models.Manager()
-    customer: models.Manager = CustomerManager()
-    supplier: models.Manager = SupplierManager()
+    objects = models.Manager["Stakeholder"]()
+    customer = CustomerManager()
+    supplier = SupplierManager()
 
 
 class StakeholderEmployee(models.Model):

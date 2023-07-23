@@ -1,6 +1,7 @@
+from typing import Generic, TypeVar
+
 from django.db import models
 from django.utils import timezone
-
 # from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
@@ -53,7 +54,10 @@ class FilterOutActiveObjectsManager(models.Manager):
         return queryset
 
 
-class InactivatedMixin(models.Model):
+T = TypeVar("T")
+
+
+class InactivatedMixin(models.Model, Generic[T]):
     """creates a field called inactivated and two managers to filter them.
     managers are called active_objects and inactive_objects, also has objects manager
     which doesn't do filtering.
@@ -61,9 +65,9 @@ class InactivatedMixin(models.Model):
 
     inactivated: bool = models.BooleanField(_("Inactivated"), default=False)
 
-    active_objects: FilterOutInactiveObjectsManager = FilterOutInactiveObjectsManager()
-    inactive_objects: FilterOutActiveObjectsManager = FilterOutActiveObjectsManager()
-    objects = models.Manager()
+    active_objects = FilterOutInactiveObjectsManager[T]()
+    inactive_objects = FilterOutActiveObjectsManager[T]()
+    objects = models.Manager[T]()
 
     class Meta:
         abstract = True

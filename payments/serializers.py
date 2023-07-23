@@ -2,9 +2,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.fields import OrderedDict
 
-from payments.models import (Bank, CashPayment, ChequePayment,
-                             InvoiceCashPayment, InvoiceChequePayment, Payment,
-                             PaymentAccount)
+from payments.models import Bank, InvoicePayment, Payment, PaymentAccount
 from stakeholder.serializers import StakeholderSerializer
 from users.serializers import UserSerializer
 from utilities.serializer_helpers import (CurrentUserCreatedBy,
@@ -48,6 +46,17 @@ class PaymentAccountOutSerializer(ModelSerializer):
         ]
 
 
+class PaymentAccountOutSimpleSerializer(ModelSerializer):
+    stakeholder = StakeholderSerializer(required=False)
+
+    class Meta:
+        model = PaymentAccount
+        fields = [
+            "name",
+            "stakeholder",
+        ]
+
+
 class PaymentAccountInSerializer(ModelSerializer):
     created_by = serializers.HiddenField(
         default=CurrentUserCreatedBy(), label=_("Created by")
@@ -80,6 +89,13 @@ class PaymentAccountInSerializer(ModelSerializer):
 
 
 class PaymentSerializer(ModelSerializer):
+    created_by = serializers.HiddenField(
+        default=CurrentUserCreatedBy(), label=_("Created by")
+    )
+    updated_by = serializers.HiddenField(
+        default=CurrentUserDefault(), label=_("Updated by")
+    )
+
     class Meta:
         model = Payment
         fields = [
@@ -91,77 +107,53 @@ class PaymentSerializer(ModelSerializer):
             "receiver",
             "amount",
             "currency",
+            "additional_info",
+            "due_date",
+            "payment_type",
         ]
 
 
-class ChequePaymentSerializer(ModelSerializer):
-    payment = PaymentSerializer(label=_("Payment info"))
+class PaymentOutSerializer(ModelSerializer):
+    created_by = UserSerializer()
+    updated_by = UserSerializer()
+    payer = PaymentAccountOutSimpleSerializer()
+    receiver = PaymentAccountOutSimpleSerializer()
 
     class Meta:
-        model = ChequePayment
+        model = Payment
         fields = [
+            "id",
             "created_by",
             "updated_by",
             "created_at",
             "updated_at",
-            "payment",
-            "cheque_number",
+            "payer",
+            "receiver",
+            "amount",
+            "currency",
+            "additional_info",
+            "due_date",
+            "payment_type",
         ]
 
 
-class CashPaymentSerializer(ModelSerializer):
-    payment = PaymentSerializer(label=_("Payment info"))
+class InvoicePaymentSerializer(ModelSerializer):
+    payment = PaymentSerializer(label=_("Payment Info"))
 
-    def create(self, validated_data: OrderedDict):
+    def create(self, validated_data):
         payment_data = validated_data.pop("payment")
         payment = PaymentSerializer().create(payment_data)
         validated_data["payment"] = payment
         return super().create(validated_data)
 
-    def update(self, instance: CashPayment, validated_data: OrderedDict):
+    def update(self, instance: InvoicePayment, validated_data: OrderedDict):
         payment_data = validated_data.pop("payment")
         PaymentSerializer().update(instance.payment, payment_data)
-        super().update(validated_data)
-
-    class Meta:
-        model = CashPayment
-        fields = [
-            "created_by",
-            "updated_by",
-            "created_at",
-            "updated_at",
-            "payment",
-        ]
-
-
-class InvoiceChequePaymentSerializer(ModelSerializer):
-    cheque_payment = ChequePaymentSerializer(label=_("Cheque Payment Info"))
-
-    class Meta:
-        model = InvoiceChequePayment
-        fields = [
-            "cheque_payment",
-            "invoice",
-        ]
-
-
-class InvoiceCashPaymentSerializer(ModelSerializer):
-    cash_payment = ChequePaymentSerializer(label=_("Cash Payment Info"))
-
-    def create(self, validated_data):
-        cash_payment_data = validated_data.pop("cash_payment")
-        cash_payment = CashPaymentSerializer().create(cash_payment_data)
-        validated_data["cash_payment"] = cash_payment
-        return super().create(validated_data)
-
-    def update(self, instance: InvoiceCashPayment, validated_data: OrderedDict):
-        cash_payment_data = validated_data.pop("cash_payment")
-        CashPaymentSerializer().update(instance.cash_payment, cash_payment_data)
         return super().update(validated_data)
 
     class Meta:
-        model = InvoiceCashPayment
+        model = InvoicePayment
         fields = [
-            "cash_payment",
+            "payment",
             "invoice",
         ]

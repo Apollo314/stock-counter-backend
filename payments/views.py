@@ -99,3 +99,91 @@ class PaymentAccountViewset(ModelViewSet):
             return serializers.PaymentAccountOutSerializer
         else:
             return serializers.PaymentAccountOutSerializer
+
+
+class PaymentViewset(ModelViewSet):
+    queryset = models.Payment.objects.all()
+    serializer_class = serializers.PaymentOutSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    ordering_fields = [
+        "id",
+        "amount",
+        "currency",
+        "payer",
+        "receiver",
+        "created_at",
+        "updated_at",
+        "created_by",
+        "updated_by",
+    ]
+    ordering = ["-id"]
+    filterset_fields = {
+        "payer": {
+            "exact": {
+                "component": "payment-account-select",
+                "props": {"label": _("Payer")},
+            }
+        },
+        "receiver": {
+            "exact": {
+                "component": "payment-account-select",
+                "props": {"label": _("Receiver")},
+            }
+        },
+        "created_at": {
+            "range": {
+                "component": "date-time-range",
+                "props": {"label": _("Created at")},
+            }
+        },
+        "updated_at": {
+            "range": {
+                "component": "date-time-range",
+                "props": {"label": _("Updated at")},
+            }
+        },
+        "created_by": {
+            "exact": {
+                "component": "user-select",
+                "props": {"label": _("Created by")},
+            }
+        },
+        "updated_by": {
+            "exact": {
+                "component": "user-select",
+                "props": {"label": _("Updated by")},
+            }
+        },
+        "due_date": {
+            "range": {
+                "component": "date-time-range",
+                "props": {"label": _("Due date")},
+            }
+        },
+        "additional_info": {
+            "icontains": {
+                "component": "text-input",
+                "props": {"label": _("Additional info")},
+            }
+        },
+        "payment_type": {
+            "exact": {
+                "component": "payment-type-select",
+                "props": {"label": _("Payment type")},
+            }
+        },
+    }
+    search_fields = [
+        "payer__name",
+        "payer__stakeholder__name",
+        "payer__iban",
+        "payer__account_number" "receiver__name",
+        "receiver__stakeholder__name",
+        "receiver__iban",
+        "receiver__account_number",
+    ]
+
+
+class InvoicePaymentViewset(ModelViewSet):
+    queryset = models.InvoicePayment.objects.all()
+    serializer_class = serializers.InvoicePaymentSerializer
