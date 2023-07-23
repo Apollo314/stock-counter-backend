@@ -13,7 +13,11 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 
+import django_stubs_ext
 import dotenv
+
+django_stubs_ext.monkeypatch()
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 LOCALE_PATHS = (BASE_DIR / "locale",)
@@ -173,7 +177,7 @@ REST_FRAMEWORK = {
         "users.authentication.TokenCookieAuthentication",
         # "knox.auth.TokenAuthentication",
         # "rest_framework.authentication.BasicAuthentication",
-        # "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
         # 'rest_framework.authentication.TokenAuthentication',
     ],
     "DEFAULT_PERMISSION_CLASSES": [

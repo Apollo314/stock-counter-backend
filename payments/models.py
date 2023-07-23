@@ -1,5 +1,3 @@
-import uuid
-
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -9,11 +7,11 @@ from utilities.common_model_mixins import CreateUpdateInfo, InactivatedMixin
 from utilities.enums import Currency
 
 
-class Bank(CreateUpdateInfo, InactivatedMixin):
+class Bank(CreateUpdateInfo, InactivatedMixin["Bank"]):
     name = models.CharField(_("Bank name"), max_length=50, unique=True)
 
 
-class PaymentAccount(CreateUpdateInfo, InactivatedMixin):
+class PaymentAccount(CreateUpdateInfo, InactivatedMixin["PaymentAccount"]):
     name = models.CharField(_("Payment account name"), max_length=50)
     bank = models.ForeignKey(
         Bank, verbose_name=_("Bank"), on_delete=models.PROTECT, null=True, blank=True
@@ -28,8 +26,16 @@ class PaymentAccount(CreateUpdateInfo, InactivatedMixin):
         on_delete=models.CASCADE,
     )
 
+    payments_made: models.QuerySet["Payment"]
+    payments_received: models.QuerySet["Payment"]
+
     class Meta:
         unique_together = [["name", "bank", "stakeholder"]]
+
+
+class PaymentType(models.TextChoices):
+    cash = "cash"
+    cheque = "cheque"
 
 
 class Payment(CreateUpdateInfo):
@@ -37,7 +43,6 @@ class Payment(CreateUpdateInfo):
         _("Amount"),
         max_digits=19,
         decimal_places=4,
-        default=None,
     )
     currency = models.CharField(
         _("Currency"),
@@ -57,38 +62,19 @@ class Payment(CreateUpdateInfo):
         on_delete=models.PROTECT,
         related_name="payments_received",
     )
+    payment_type = models.CharField(
+        _("Payment type"),
+        max_length=20,
+        choices=PaymentType.choices,
+        default=PaymentType.cash,
+    )
+    additional_info = models.TextField(_("Additional info"), null=True, blank=True)
+    due_date = models.DateField(_("Due date"), null=True, blank=True)
 
 
-class ChequePayment(CreateUpdateInfo):
+class InvoicePayment(models.Model):
     payment = models.ForeignKey(
-        Payment, verbose_name=_("Payment info"), on_delete=models.CASCADE
-    )
-    cheque_number = models.CharField(
-        _("Cheque number"), max_length=40, null=True, blank=True
-    )
-
-
-class CashPayment(CreateUpdateInfo):
-    payment = models.ForeignKey(
-        Payment, verbose_name=_("Payment info"), on_delete=models.CASCADE
-    )
-
-
-class InvoiceChequePayment(models.Model):
-    cheque_payment = models.ForeignKey(
-        ChequePayment, verbose_name=_("Cheque Payment Info"), on_delete=models.CASCADE
-    )
-    invoice = models.ForeignKey(
-        Invoice,
-        verbose_name=_("Invoice"),
-        on_delete=models.CASCADE,
-        related_name="cheque_payments",
-    )
-
-
-class InvoiceCashPayment(models.Model):
-    cash_payment = models.ForeignKey(
-        CashPayment, verbose_name=_("Cash Payment Info"), on_delete=models.CASCADE
+        Payment, verbose_name=_("Payment Info"), on_delete=models.CASCADE
     )
     invoice = models.ForeignKey(
         Invoice,

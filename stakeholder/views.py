@@ -38,7 +38,7 @@ class SupplierViewset(ModelViewSet):
 
 
 class CustomerViewset(ModelViewSet):
-    queryset = models.Stakeholder.customer.prefetch_related("employees").all()
+    queryset = models.Stakeholder.customer.all()
     serializer_class = serializers.StakeholderSerializer
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = [
@@ -67,6 +67,14 @@ class CustomerViewset(ModelViewSet):
             "icontains": {"component": "text-input", "props": {"label": "Telefon"}}
         },
     }
+
+    def get_queryset(self):
+        if self.action == "retrieve":
+            queryset = models.Stakeholder.customer.prefetch_related(
+                "employees", "paymentaccount_set"
+            )
+            return queryset
+        return super().get_queryset()
 
 
 class StakeholderEmployeeViewset(ModelViewSet):
