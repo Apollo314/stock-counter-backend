@@ -1,3 +1,5 @@
+from typing import TypeVar
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -8,7 +10,10 @@ class StakeholderRole(models.TextChoices):
     customer_and_supplier = "Müşteri ve Satıcı"
 
 
-class SupplierManager(models.Manager):
+T = TypeVar("T")
+
+
+class SupplierManager(models.Manager[T]):
     def get_queryset(self):
         return (
             super()
@@ -22,7 +27,7 @@ class SupplierManager(models.Manager):
         )
 
 
-class CustomerManager(models.Manager):
+class CustomerManager(models.Manager[T]):
     def get_queryset(self):
         return (
             super()
@@ -48,8 +53,8 @@ class Stakeholder(models.Model):
     employees: models.QuerySet["StakeholderEmployee"]
 
     objects = models.Manager["Stakeholder"]()
-    customer = CustomerManager()
-    supplier = SupplierManager()
+    customer = CustomerManager["Stakeholder"]()
+    supplier = SupplierManager["Stakeholder"]()
 
 
 class StakeholderEmployee(models.Model):
