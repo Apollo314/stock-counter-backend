@@ -57,5 +57,3 @@ exclude = ["**/node_modules",
     "src/experimental",
     "src/typestubs"
 ]
-venvPath = "C:/Users/Apollo/AppData/Local/Packages/PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0/LocalCache/Local/pypoetry/Cache/virtualenvs"
-venv = "goktugv2-4yG3oDP2-py3.11"
