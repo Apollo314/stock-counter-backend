@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-19 07:07+0300\n"
+"POT-Creation-Date: 2023-07-29 15:23+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,12 +19,12 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: .\inventory\models.py:17 .\inventory\models.py:87
-#: .\inventory\serializers.py:130 .\inventory\views.py:54
+#: .\inventory\serializers.py:131 .\inventory\views.py:54
 msgid "Category"
 msgstr "Kategori"
 
 #: .\inventory\models.py:29 .\inventory\models.py:94
-#: .\inventory\serializers.py:129 .\inventory\views.py:85
+#: .\inventory\serializers.py:130 .\inventory\views.py:85
 msgid "Stock unit"
 msgstr "Birim"
 
@@ -72,11 +72,11 @@ msgstr "Ürün/Hizmet resmi"
 msgid "Depot name"
 msgstr "Depo adı"
 
-#: .\inventory\models.py:119
+#: .\inventory\models.py:119 .\stakeholder\models.py:51
 msgid "Address"
 msgstr "Adres"
 
-#: .\inventory\models.py:120
+#: .\inventory\models.py:120 .\stakeholder\models.py:48
 msgid "Phone"
 msgstr "Telefon"
 
@@ -84,21 +84,23 @@ msgstr "Telefon"
 msgid "Plate number"
 msgstr "Plaka numarası"
 
-#: .\inventory\models.py:145 .\inventory\models.py:197
+#: .\inventory\models.py:145 .\inventory\models.py:197 .\payments\models.py:43
 msgid "Amount"
 msgstr "Miktar"
 
-#: .\inventory\serializers.py:131 .\inventory\views.py:103
-#: .\invoice\serializers.py:110 .\invoice\serializers.py:154
-#: .\invoice\views.py:38 .\invoice\views.py:126
-#: .\utilities\common_model_mixins.py:12
+#: .\inventory\serializers.py:132 .\inventory\views.py:103
+#: .\invoice\serializers.py:111 .\invoice\serializers.py:159
+#: .\invoice\views.py:38 .\invoice\views.py:126 .\payments\serializers.py:62
+#: .\payments\serializers.py:93 .\payments\views.py:65 .\payments\views.py:148
+#: .\utilities\common_model_mixins.py:14
 msgid "Created by"
 msgstr "Oluşturan"
 
-#: .\inventory\serializers.py:132 .\inventory\views.py:109
-#: .\invoice\serializers.py:111 .\invoice\serializers.py:155
-#: .\invoice\views.py:44 .\invoice\views.py:132
-#: .\utilities\common_model_mixins.py:20
+#: .\inventory\serializers.py:133 .\inventory\views.py:109
+#: .\invoice\serializers.py:112 .\invoice\serializers.py:160
+#: .\invoice\views.py:44 .\invoice\views.py:132 .\payments\serializers.py:65
+#: .\payments\serializers.py:96 .\payments\views.py:71 .\payments\views.py:154
+#: .\utilities\common_model_mixins.py:23
 msgid "Updated by"
 msgstr "Güncelleyen"
 
@@ -107,20 +109,22 @@ msgid "Show categoryless"
 msgstr "Kategorisizleri göster"
 
 #: .\inventory\views.py:91 .\invoice\views.py:26 .\invoice\views.py:114
-#: .\utilities\common_model_mixins.py:27
+#: .\payments\views.py:53 .\payments\views.py:136
+#: .\utilities\common_model_mixins.py:30
 msgid "Created at"
 msgstr "Oluşturulma tarihi"
 
 #: .\inventory\views.py:97 .\invoice\views.py:32 .\invoice\views.py:120
-#: .\utilities\common_model_mixins.py:30
+#: .\payments\views.py:59 .\payments\views.py:142
+#: .\utilities\common_model_mixins.py:36
 msgid "Updated at"
 msgstr "Güncelleme tarihi"
 
 #: .\inventory\views.py:116
 msgid "Show inactivated Items/Services"
-msgstr "İnaktif Ürün/Hizmetleri göster"
+msgstr "Devre dışı Ürün/Hizmetleri göster"
 
-#: .\invoice\models.py:17 .\invoice\models.py:111
+#: .\invoice\models.py:17 .\invoice\models.py:113
 #, fuzzy
 #| msgid "Invoice item"
 msgid "Invoice conditions"
@@ -160,53 +164,54 @@ msgstr "Vergisiz toplam"
 msgid "Total with tax"
 msgstr "Vergiler dahil toplam"
 
-#: .\invoice\models.py:60 .\invoice\serializers.py:113
+#: .\invoice\models.py:60 .\invoice\serializers.py:114 .\payments\models.py:23
+#: .\payments\views.py:77
 msgid "Stakeholder"
 msgstr "Alakalı taraf"
 
-#: .\invoice\models.py:67 .\invoice\serializers.py:112
+#: .\invoice\models.py:67 .\invoice\serializers.py:113
 #, fuzzy
 #| msgid "Depot name"
 msgid "Depot"
 msgstr "Depo adı"
 
-#: .\invoice\models.py:75
+#: .\invoice\models.py:77
 msgid "Related invoices"
 msgstr "Alakalı faturalar"
 
-#: .\invoice\models.py:85
+#: .\invoice\models.py:87
 #, fuzzy
 #| msgid "View all invoices"
 msgid "Can view all invoices"
 msgstr "Tüm faturaları görüntüleme"
 
-#: .\invoice\models.py:98 .\invoice\serializers.py:174
+#: .\invoice\models.py:100 .\invoice\serializers.py:183
 #, fuzzy
 #| msgid "Invoice item"
 msgid "Invoice Condition Template"
 msgstr "Fatura koşulları"
 
-#: .\invoice\models.py:107 .\invoice\serializers.py:173
+#: .\invoice\models.py:109 .\invoice\serializers.py:180 .\payments\models.py:81
 #, fuzzy
 #| msgid "Invoice type"
 msgid "Invoice"
 msgstr "Fatura tipi"
 
-#: .\invoice\models.py:118
+#: .\invoice\models.py:120
 #, fuzzy
 #| msgid "Related invoices"
 msgid "Related Invoice"
 msgstr "Alakalı faturalar"
 
-#: .\invoice\models.py:124
+#: .\invoice\models.py:126
 msgid "Stock movement"
 msgstr "Stok hareketi"
 
-#: .\invoice\models.py:127
+#: .\invoice\models.py:129
 msgid "Price"
 msgstr "Fiyat"
 
-#: .\invoice\serializers.py:139 .\invoice\serializers.py:177
+#: .\invoice\serializers.py:142 .\invoice\serializers.py:189
 #, fuzzy
 #| msgid "Invoice item"
 msgid "Content of the invoice condition"
@@ -215,6 +220,84 @@ msgstr "Fatura koşulları"
 #: .\invoice\views.py:137
 msgid "Contents"
 msgstr "İçerik"
+
+#: .\payments\models.py:11
+msgid "Bank name"
+msgstr "Banka adı"
+
+#: .\payments\models.py:15
+msgid "Payment account name"
+msgstr "Ödeme hesabı adı"
+
+#: .\payments\models.py:17 .\payments\views.py:89
+msgid "Bank"
+msgstr "Banka"
+
+#: .\payments\models.py:19
+msgid "Account number"
+msgstr "Hesap numarası"
+
+#: .\payments\models.py:20
+msgid "IBAN"
+msgstr "IBAN"
+
+#: .\payments\models.py:48
+msgid "Currency"
+msgstr "Para birimi"
+
+#: .\payments\models.py:55 .\payments\views.py:124
+msgid "Payer"
+msgstr "Ödeyen"
+
+#: .\payments\models.py:61 .\payments\views.py:130
+msgid "Receiver"
+msgstr "Tahsildar"
+
+#: .\payments\models.py:66 .\payments\views.py:172
+msgid "Payment type"
+msgstr "Ödeme tipi"
+
+#: .\payments\models.py:71 .\payments\views.py:166
+msgid "Additional info"
+msgstr "Ek bilgi"
+
+#: .\payments\models.py:72 .\payments\views.py:160
+msgid "Due date"
+msgstr "Son ödeme tarihi"
+
+#: .\payments\models.py:77 .\payments\serializers.py:141
+msgid "Payment Info"
+msgstr "Ödeme Bilgisi"
+
+#: .\payments\views.py:47
+msgid "Account name"
+msgstr "Hesap adı"
+
+#: .\payments\views.py:83
+msgid "Account Number"
+msgstr "Hesap Numarası"
+
+#: .\stakeholder\models.py:45
+msgid "Role"
+msgstr "Rol"
+
+#: .\stakeholder\models.py:46
+msgid "Full name"
+msgstr "Tam ad"
+
+#: .\stakeholder\models.py:47
+#, fuzzy
+#| msgid "Depot name"
+msgid "Short name"
+msgstr "Depo adı"
+
+#: .\stakeholder\models.py:49
+msgid "Email"
+msgstr "Eposta"
+
+#: .\stakeholder\models.py:50
+msgid "VKN/TCKN"
+msgstr "VKN/TCKN"
 
 #: .\users\authentication.py:37
 msgid "Invalid token."
@@ -237,7 +320,6 @@ msgid ""
 "Couldn't login with the given information. Password or Username may be wrong."
 msgstr "Verilen bilgilerle giriş yapılamadı. Kontrol ederek yeniden giriniz."
 
-#, fuzzy
-#~| msgid "Hide from list view(will persist in invoices that uses this)"
-#~ msgid "Hide from list view (will persist in invoices that uses this)"
-#~ msgstr "Koşulu gizle. (halihazırda kullanan faturalarda kalmaya devam eder)"
+#: .\utilities\common_model_mixins.py:66
+msgid "Inactivated"
+msgstr "Devre dışı"
