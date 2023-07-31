@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "goktugv2"
+name = "stockcounter"
 version = "0.1.0"
 description = ""
 authors = ["Apollo314 <abidinsefa@outlook.com>"]
