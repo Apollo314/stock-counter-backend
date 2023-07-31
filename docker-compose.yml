@@ -35,8 +35,8 @@ services:
       dockerfile: ./django.Dockerfile
     # restart: always
     # command: python manage.py runserver 0.0.0.0:8000
-    # command: uvicorn goktugv2.asgi:application --host 0.0.0.0 --port 8000
-    command: gunicorn goktugv2.asgi:application --bind 0.0.0.0:8000 --workers 4 -k uvicorn.workers.UvicornWorker
+    # command: uvicorn stockcounter.asgi:application --host 0.0.0.0 --port 8000
+    command: gunicorn stockcounter.asgi:application --bind 0.0.0.0:8000 --workers 4 -k uvicorn.workers.UvicornWorker
     volumes:
       - .:/code
     ports:
