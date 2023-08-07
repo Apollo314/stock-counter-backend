@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-29 15:23+0300\n"
+"POT-Creation-Date: 2023-08-07 09:17+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -76,7 +76,7 @@ msgstr "Depo adı"
 msgid "Address"
 msgstr "Adres"
 
-#: .\inventory\models.py:120 .\stakeholder\models.py:48
+#: .\inventory\models.py:120 .\stakeholder\models.py:48 .\users\models.py:16
 msgid "Phone"
 msgstr "Telefon"
 
@@ -320,6 +320,47 @@ msgid ""
 "Couldn't login with the given information. Password or Username may be wrong."
 msgstr "Verilen bilgilerle giriş yapılamadı. Kontrol ederek yeniden giriniz."
 
+#: .\users\models.py:18
+msgid "User profile picture"
+msgstr "Kullanıcı resmi"
+
+#: .\users\models.py:23
+#, fuzzy
+#| msgid "Address"
+msgid "email address"
+msgstr "Adres"
+
+#: .\users\serializers.py:18
+#, fuzzy
+#| msgid "Payment type"
+msgid "content type"
+msgstr "Ödeme tipi"
+
+#: .\users\serializers.py:36
+msgid "permissions"
+msgstr "Yetkiler"
+
+#: .\users\serializers.py:88
+msgid "User is staff"
+msgstr "Kullanıcı bir çalışan"
+
+#: .\users\serializers.py:91
+msgid "User is admin"
+msgstr "Kullanıcı bir yönetici"
+
+#: .\users\serializers.py:117
+msgid "Reenter the password"
+msgstr "Parolayı yeniden giriniz"
+
+#: .\users\serializers.py:127 .\users\serializers.py:128
+msgid "Passwords must match."
+msgstr "Şifreley birbirinin aynısı olmalı"
+
 #: .\utilities\common_model_mixins.py:66
 msgid "Inactivated"
 msgstr "Devre dışı"
+
+#, fuzzy
+#~| msgid "Password"
+#~ msgid "password2"
+#~ msgstr "Parola"
