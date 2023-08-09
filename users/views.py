@@ -1,4 +1,6 @@
+import django_filters
 from django.contrib.auth.models import Group, Permission
+from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.response import Response
@@ -28,57 +30,84 @@ class GroupViewset(ModelViewSet):
         return users_serializers.GroupSerializer
 
 
+class UserFilter(django_filters.FilterSet):
+    groups__in = django_filters.filters.ModelMultipleChoiceFilter(
+        field_name="groups",
+        queryset=Group.objects.all(),
+    )
+
+    class Meta:
+        model = User
+        fields = {
+            "username": {
+                "icontains": {
+                    "component": "text-input",
+                    "props": {"label": _("username"), "placeholder": _("username")},
+                }
+            },
+            "first_name": {
+                "icontains": {
+                    "component": "text-input",
+                    "props": {"label": _("first name"), "placeholder": _("first name")},
+                }
+            },
+            "last_name": {
+                "icontains": {
+                    "component": "text-input",
+                    "props": {"label": _("last name"), "placeholder": _("last name")},
+                }
+            },
+            "is_staff": {
+                "exact": {
+                    "component": "checkbox",
+                    "props": {"label": _("staff status"), "toggleIndeterminate": True},
+                }
+            },
+            "is_superuser": {
+                "exact": {
+                    "component": "checkbox",
+                    "props": {
+                        "label": _("superuser status"),
+                        "toggleIndeterminate": True,
+                    },
+                }
+            },
+            "is_active": {
+                "exact": {
+                    "component": "checkbox",
+                    "props": {"label": _("active"), "toggleIndeterminate": True},
+                }
+            },
+            "date_joined": {
+                "range": {
+                    "component": "date-time-range",
+                    "props": {"label": _("date joined")},
+                }
+            },
+        }
+
+
 class UserViewset(ModelViewSet):
     queryset = User.objects.prefetch_related("groups").all()
     serializer_class = users_serializers.UserSerializer
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ["first_name", "last_name", "email", "username"]
-    filterset_fields = {
-        "username": {
-            "icontains": {
-                "component": "text-input",
-                "props": {"label": "Kullanıcı Adı", "placeholder": "Kullanıcı Adı"},
-            }
-        },
-        "first_name": {
-            "icontains": {
-                "component": "text-input",
-                "props": {"label": "İsim", "placeholder": "İsim"},
-            }
-        },
-        "first_name": {
-            "icontains": {
-                "component": "text-input",
-                "props": {"label": "Soy İsim", "placeholder": "Soy İsim"},
-            }
-        },
+    filterset_class = UserFilter
+    filterset_overrides = {
         "groups": {
             "in": {
-                "component": "user-group-selector",
-                "props": {"label": "Kullanıcı Grubu"},
+                "component": "group-selector",
+                "props": {"label": _("groups"), "multiple": True},
             }
-        },
-        "is_staff": {
-            "exact": {"component": "checkbox", "props": {"label": "Yetkili Çalışan"}}
-        },
-        "is_superuser": {
-            "exact": {"component": "checkbox", "props": {"label": "Admin"}}
-        },
-        "is_active": {"exact": {"component": "checkbox", "props": {"label": "Etkin"}}},
-        "date_joined": {
-            "range": {
-                "component": "date-time-range",
-                "props": {"label": "Kayıt Tarihi"},
-            }
-        },
+        }
     }
 
     def get_serializer_class(self):
         if self.action in ["list", "retrieve"]:
             return users_serializers.UserSerializer
-        elif self.action == 'create':
+        elif self.action == "create":
             return users_serializers.UserCreateSerializer
-        elif self.action == 'update':
+        elif self.action == "update":
             return users_serializers.UserUpdateSerializer
         return users_serializers.ConciseUserSerializer
 
@@ -91,4 +120,3 @@ class MyAccountView(GenericAPIView):
         user = request.user
         serializer = self.get_serializer(user)
         return Response(serializer.data)
-
