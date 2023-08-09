@@ -41,7 +41,7 @@ class GroupDetailSerializer(ModelSerializer):
 
 
 class UserSerializer(ModelSerializer):
-    groups = GroupSerializer(many=True, required=False)
+    groups = GroupSerializer(many=True, required=False, label=_("groups"))
 
     class Meta:
         model = User
@@ -81,18 +81,22 @@ class ConciseUserSerializer(ModelSerializer):
             "groups",
         )
 
+
+USER_FORM_OVERRIDES = {
+    "groups": {"component": "group-selector"},
+    "avatar": {"component": "single-image-selector"},
+    "is_staff": {"component": "checkbox", "props": {"label": _("User is staff")}},
+    "is_superuser": {
+        "component": "checkbox",
+        "props": {"label": _("User is admin")},
+    },
+    "password": {"component": "password-input", "props": {"suggest": True}},
+    "password2": {"component": "password-input", "props": {"suggest": False}},
+}
+
+
 class UserUpdateSerializer(ModelSerializer):
-    field_overrides = {
-        "groups": {"component": "group-selector"},
-        "avatar": {"component": "single-image-selector"},
-        "is_staff": {"component": "checkbox", "props": {"label": _("User is staff")}},
-        "is_superuser": {
-            "component": "checkbox",
-            "props": {"label": _("User is admin")},
-        },
-        "password": {"component": "password-input", "props": {"suggest": True}},
-        "password2": {"component": "password-input", "props": {"suggest": False}},
-    }
+    field_overrides = USER_FORM_OVERRIDES
 
     class Meta:
         model = User
@@ -111,8 +115,8 @@ class UserUpdateSerializer(ModelSerializer):
 
 
 class UserCreateSerializer(ModelSerializer):
+    field_overrides = USER_FORM_OVERRIDES
     password2 = serializers.CharField(
-        style={"input_type": "password"},
         write_only=True,
         label=_("Reenter the password"),
     )
@@ -149,7 +153,6 @@ class UserCreateSerializer(ModelSerializer):
             "password2",
         )
         extra_kwargs = {"password": {"write_only": True}}
-
 
 
 class UserWithGroupDetailSerializer(UserSerializer):
