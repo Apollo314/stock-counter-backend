@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-07 09:17+0300\n"
+"POT-Creation-Date: 2023-08-10 04:06+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,21 +18,21 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: .\inventory\models.py:17 .\inventory\models.py:87
-#: .\inventory\serializers.py:131 .\inventory\views.py:54
+#: .\inventory\models.py:17 .\inventory\models.py:82
+#: .\inventory\serializers.py:133 .\inventory\views.py:54
 msgid "Category"
 msgstr "Kategori"
 
-#: .\inventory\models.py:29 .\inventory\models.py:94
-#: .\inventory\serializers.py:130 .\inventory\views.py:85
+#: .\inventory\models.py:29 .\inventory\models.py:89
+#: .\inventory\serializers.py:132 .\inventory\views.py:85
 msgid "Stock unit"
 msgstr "Birim"
 
-#: .\inventory\models.py:46 .\inventory\models.py:133
+#: .\inventory\models.py:47 .\inventory\models.py:126
 msgid "Item/Service"
 msgstr "Ürün/Hizmet"
 
-#: .\inventory\models.py:48 .\invoice\models.py:35
+#: .\inventory\models.py:49 .\invoice\models.py:35
 msgid "Description"
 msgstr "Açıklama"
 
@@ -40,55 +40,55 @@ msgstr "Açıklama"
 msgid "Buy price"
 msgstr "Alış fiyatı"
 
-#: .\inventory\models.py:56
+#: .\inventory\models.py:55
 msgid "Buy currency"
 msgstr "Alış para birimi"
 
-#: .\inventory\models.py:64 .\inventory\views.py:73
+#: .\inventory\models.py:62 .\inventory\views.py:73
 msgid "Sell price"
 msgstr "Satış fiyatı"
 
-#: .\inventory\models.py:67
+#: .\inventory\models.py:64
 msgid "Sell currency"
 msgstr "Satış para birimi"
 
-#: .\inventory\models.py:74 .\inventory\views.py:79
+#: .\inventory\models.py:71 .\inventory\views.py:79
 msgid "Barcode"
 msgstr "Barkod"
 
-#: .\inventory\models.py:77
+#: .\inventory\models.py:73
 msgid "Stock code"
 msgstr "Birim kodu"
 
-#: .\inventory\models.py:82
+#: .\inventory\models.py:77
 msgid "Thumbnail"
 msgstr "Önizleme resmi"
 
-#: .\inventory\models.py:111
+#: .\inventory\models.py:104
 msgid "Item/Service image"
 msgstr "Ürün/Hizmet resmi"
 
-#: .\inventory\models.py:118 .\inventory\models.py:139
+#: .\inventory\models.py:111 .\inventory\models.py:132
 msgid "Depot name"
 msgstr "Depo adı"
 
-#: .\inventory\models.py:119 .\stakeholder\models.py:51
+#: .\inventory\models.py:112 .\stakeholder\models.py:51
 msgid "Address"
 msgstr "Adres"
 
-#: .\inventory\models.py:120 .\stakeholder\models.py:48 .\users\models.py:16
+#: .\inventory\models.py:113 .\stakeholder\models.py:48 .\users\models.py:16
 msgid "Phone"
 msgstr "Telefon"
 
-#: .\inventory\models.py:122
+#: .\inventory\models.py:115
 msgid "Plate number"
 msgstr "Plaka numarası"
 
-#: .\inventory\models.py:145 .\inventory\models.py:197 .\payments\models.py:43
+#: .\inventory\models.py:138 .\inventory\models.py:187 .\payments\models.py:43
 msgid "Amount"
 msgstr "Miktar"
 
-#: .\inventory\serializers.py:132 .\inventory\views.py:103
+#: .\inventory\serializers.py:134 .\inventory\views.py:103
 #: .\invoice\serializers.py:111 .\invoice\serializers.py:159
 #: .\invoice\views.py:38 .\invoice\views.py:126 .\payments\serializers.py:62
 #: .\payments\serializers.py:93 .\payments\views.py:65 .\payments\views.py:148
@@ -96,7 +96,7 @@ msgstr "Miktar"
 msgid "Created by"
 msgstr "Oluşturan"
 
-#: .\inventory\serializers.py:133 .\inventory\views.py:109
+#: .\inventory\serializers.py:135 .\inventory\views.py:109
 #: .\invoice\serializers.py:112 .\invoice\serializers.py:160
 #: .\invoice\views.py:44 .\invoice\views.py:132 .\payments\serializers.py:65
 #: .\payments\serializers.py:96 .\payments\views.py:71 .\payments\views.py:154
@@ -340,6 +340,10 @@ msgstr "Ödeme tipi"
 msgid "permissions"
 msgstr "Yetkiler"
 
+#: .\users\serializers.py:44 .\users\views.py:100
+msgid "groups"
+msgstr ""
+
 #: .\users\serializers.py:88
 msgid "User is staff"
 msgstr "Kullanıcı bir çalışan"
@@ -348,17 +352,69 @@ msgstr "Kullanıcı bir çalışan"
 msgid "User is admin"
 msgstr "Kullanıcı bir yönetici"
 
-#: .\users\serializers.py:117
+#: .\users\serializers.py:121
 msgid "Reenter the password"
 msgstr "Parolayı yeniden giriniz"
 
-#: .\users\serializers.py:127 .\users\serializers.py:128
+#: .\users\serializers.py:131 .\users\serializers.py:132
 msgid "Passwords must match."
 msgstr "Şifreley birbirinin aynısı olmalı"
+
+#: .\users\views.py:45
+#, fuzzy
+#| msgid "Username"
+msgid "username"
+msgstr "Kullanıcı adı"
+
+#: .\users\views.py:51
+#, fuzzy
+#| msgid "Depot name"
+msgid "first name"
+msgstr "Depo adı"
+
+#: .\users\views.py:57
+#, fuzzy
+#| msgid "Bank name"
+msgid "last name"
+msgstr "Banka adı"
+
+#: .\users\views.py:63
+msgid "staff status"
+msgstr ""
+
+#: .\users\views.py:70
+msgid "superuser status"
+msgstr ""
+
+#: .\users\views.py:78
+#, fuzzy
+#| msgid "Inactivated"
+msgid "active"
+msgstr "Devre dışı"
+
+#: .\users\views.py:84
+msgid "date joined"
+msgstr ""
 
 #: .\utilities\common_model_mixins.py:66
 msgid "Inactivated"
 msgstr "Devre dışı"
+
+#: .\utilities\enums.py:6
+msgid "Turkish lira"
+msgstr "Türk lirası"
+
+#: .\utilities\enums.py:7
+msgid "US dollars"
+msgstr "Amerikan doları"
+
+#: .\utilities\enums.py:8
+msgid "Euro"
+msgstr "Euro"
+
+#: .\utilities\enums.py:9
+msgid "Pound sterling"
+msgstr "İngiliz sterlini"
 
 #, fuzzy
 #~| msgid "Password"
