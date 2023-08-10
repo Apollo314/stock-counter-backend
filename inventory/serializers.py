@@ -98,6 +98,7 @@ class ItemInSerializer(DynamicFieldsModelSerializer):
         "category": {"component": "category-selector"},
         "buyprice": {"component": "money-input"},
         "sellprice": {"component": "money-input"},
+        "kdv": {"component": "text-input", "props": {"type": "number", "prefix": "%"}},
     }
 
     class Meta:
@@ -294,9 +295,6 @@ class StockMovementNestedSerializer(ModelSerializer):
             **validated_data, warehouse_item_stock_id=warehouse_item_stock_id
         )
         return stock_movement
-        # return super().create(
-        #     {**validated_data, "warehouse_item_stock": warehouse_item_stock}
-        # )
 
     def update(self, instance: models.StockMovement, validated_data: OrderedDict):
         warehouse_item_stock_data: OrderedDict[
@@ -320,9 +318,6 @@ class StockMovementNestedSerializer(ModelSerializer):
         instance.warehouse_item_stock.amount_db = None
         instance.amount = validated_data["amount"]
         return instance
-        # we don't really want to update WarehouseItemStock like this. so just pop it.
-        validated_data.pop("warehouse_item_stock")
-        return super().update(instance, validated_data)
 
     class Meta:
         model = models.StockMovement

@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 from django.test import TestCase
-from utilities.enums import StockMovementType
 
 from inventory.models import (
     Currency,

@@ -69,8 +69,9 @@ class InvoiceItemSerializer(ModelSerializer):
     id = serializers.IntegerField(required=False)
     stock_movement = StockMovementNestedSerializer()
 
-    # setting required=False because it will be passed by InvoiceDetailSerializer downward
-    # so that client doesn't need to pass invoice to every single item.
+    # setting required=False because it will be passed by
+    # InvoiceDetailSerializer downward so that client doesn't
+    # need to pass invoice to every single item.
     invoice = serializers.IntegerField(required=False, write_only=True)
 
     def create(self, validated_data: OrderedDict):
