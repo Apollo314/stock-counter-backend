@@ -1,8 +1,9 @@
 from datetime import datetime
 
 from django.db import models
-from django_filters import DateFromToRangeFilter, fields, filters, filterset
-from django_filters.rest_framework import DjangoFilterBackend as _DjangoFilterBackend
+from django_filters import fields, filters, filterset
+from django_filters.rest_framework import \
+    DjangoFilterBackend as _DjangoFilterBackend
 from drf_spectacular.plumbing import follow_model_field_lookup
 from rest_framework.filters import OrderingFilter as _OrderingFilter
 from rest_framework.filters import SearchFilter as _SearchFilter
@@ -82,7 +83,7 @@ class DjangoFilterBackend(_DjangoFilterBackend):
                     field_name[:separator_index],
                     field_name[separator_index + 2 :],
                 )
-                if not lookup in [
+                if lookup not in [
                     "iexact",
                     "contains",
                     "icontains",
@@ -134,18 +135,3 @@ class DjangoFilterBackend(_DjangoFilterBackend):
                 parameter["schema"]["enum"] = [c[0] for c in field.extra["choices"]]
             parameters.append(parameter)
         return parameters
-
-    def get_filterset_kwargs(self, request, queryset, view):
-        query_params = request.query_params
-        params = {}
-        for param in query_params:
-            if len(paramlist := query_params.getlist(param)) > 1:
-                params[param] = ",".join(paramlist)
-            else:
-                params[param] = query_params.get(param)
-
-        return {
-            "data": params,
-            "queryset": queryset,
-            "request": request,
-        }
