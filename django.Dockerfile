@@ -14,4 +14,5 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 COPY . /code/
 
+RUN chmod +x A/code/entrypoint.sh
 ENTRYPOINT ["/code/entrypoint.sh"]
