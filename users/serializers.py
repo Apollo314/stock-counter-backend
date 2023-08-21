@@ -78,7 +78,7 @@ class ConciseUserSerializer(ModelSerializer):
             "is_staff",
             "is_superuser",
             "avatar",
-            "groups",
+            #"groups",
         )
 
 
