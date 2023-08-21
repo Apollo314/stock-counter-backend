@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "stakeholder.apps.StakeholderConfig",
     "invoice.apps.InvoiceConfig",
     "payments.apps.PaymentsConfig",
+    "dashboard.apps.DashboardConfig",
 ]
 
 MIDDLEWARE = [
@@ -239,26 +240,26 @@ LOGGING = {
     #     }
     # },
     "handlers": {
-        # "console": {
-        #     "level": "DEBUG",
-        #     # "filters": ["require_debug_true"],
-        #     "class": "logging.StreamHandler",
-        # }
+        "console": {
+            "level": "DEBUG",
+            # "filters": ["require_debug_true"],
+            "class": "logging.StreamHandler",
+        },
         "file": {
             "level": "WARNING",
             "class": "logging.FileHandler",
             "filename": BASE_DIR / "warning.log",
-        }
+        },
     },
     "loggers": {
         "root": {
             "level": "WARNING",
             "handlers": ["file"],
-        }
-        # "django.db.backends": {
-        #     "level": "DEBUG",
-        #     "handlers": ["console"],
-        # },
+        },
+        "django.db.backends": {
+            "level": "DEBUG",
+            "handlers": ["console"],
+        },
         # 'django': {
         #     'handlers': ['console'],
         #     'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
