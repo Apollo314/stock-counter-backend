@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path, re_path
+from django.urls import include, path
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,
@@ -28,6 +28,7 @@ from invoice.urls import urlpatterns as invoice_urls
 from payments.urls import urlpatterns as payments_urls
 from stakeholder.urls import urlpatterns as stakeholder_urls
 from users.urls import urlpatterns as users_urls
+from dashboard.urls import urlpatterns as dashboard_urls
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -37,6 +38,11 @@ urlpatterns = [
     path("invoice/", include(invoice_urls)),
     path("user/", include(users_urls)),
     path("payments/", include(payments_urls)),
+    path(
+        "dashboard/",
+        include(dashboard_urls),
+        name="dashboard",
+    ),
     # auth
     # schema
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

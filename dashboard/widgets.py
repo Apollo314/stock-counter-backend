@@ -1,21 +1,21 @@
 from abc import ABC, abstractmethod
 import asyncio
 from collections import defaultdict
+
 from datetime import timedelta
 from typing import Any, OrderedDict, TypeAlias
 from asgiref.sync import sync_to_async
-from django.db.models import (
-    Prefetch,
-    QuerySet,
-)
+from django.db.models import QuerySet
+
 from django.utils import timezone
 
 from rest_framework.serializers import Serializer
+from dashboard.enums import WidgetsEnum
+from dashboard.serializers import InvoiceWidgetSerializer, ItemWidgetSerializer
+
 from inventory.models import Item, StockMovement, WarehouseItemStock
-from inventory.serializers import ItemOutSerializer
 from invoice.models import Invoice
 
-from invoice.serializers import InvoiceDetailOutSerializer
 from users.models import User
 from users.serializers import UserSerializer
 
@@ -23,19 +23,9 @@ JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | 
 
 
 class Widget(ABC):
-    _unique_name: str  # will be used for enum definition
-    prefetch: Prefetch  # the query that will be prefetched
-
-    def __init__(self, **user_inputs) -> None:
+    def __init__(self, unique_name: str, **user_inputs) -> None:
         self.user_inputs = user_inputs
-
-    @property
-    def unique_name(self) -> str:
-        inputs = dict(sorted(self.user_inputs.items()))
-        return (
-            f"{self._unique_name}-"
-            f"{'|'.join(map(lambda x:f'{x[0]}:{str(x[1])}', inputs.items()))}"
-        )
+        self.unique_name = unique_name
 
     @abstractmethod
     def get_serializer_class(self) -> Serializer:
@@ -48,6 +38,10 @@ class Widget(ABC):
         raise NotImplementedError(
             "Subclasses must implement get_serializer_class method"
         )
+
+    def filter(self, user_inputs: dict[str, Any]):
+        print(user_inputs)
+        pass
 
     def serialized_data(self, serializer_data: Any) -> JSON:
         """serialized data, should return json serializable object"""
@@ -69,13 +63,11 @@ class DuePayments:  # (Widget):
 class LastInvoices(Widget):
     """Last created Invoices"""
 
-    unique_name = "last_invoices"
-
     def get_serializer_class(self) -> Serializer:
-        return InvoiceDetailOutSerializer
+        return InvoiceWidgetSerializer
 
     def get_queryset(self) -> QuerySet:
-        return Invoice.objects.all()
+        return Invoice.objects.select_related("created_by", "stakeholder").all()
 
 
 class LeftoverItems(Widget):
@@ -84,7 +76,7 @@ class LeftoverItems(Widget):
     unique_name = "leftover_items"
 
     def get_serializer_class(self) -> Serializer:
-        return ItemOutSerializer
+        return ItemWidgetSerializer
 
     def get_queryset(self):
         date = timezone.now() - timedelta(days=30)
@@ -94,7 +86,11 @@ class LeftoverItems(Widget):
         warehouse_item_stocks = WarehouseItemStock.objects.filter(
             stockmovement__in=stock_movements
         )
-        return Item.objects.filter(stocks__in=warehouse_item_stocks)
+        return (
+            Item.objects.select_related("stock_unit", "category", "created_by")
+            .prefetch_related("stocks")
+            .filter(stocks__in=warehouse_item_stocks)
+        )
 
 
 class BestCustomers:
@@ -121,9 +117,6 @@ class BalanceGraph:
     pass
 
 
-subscribed_widgets = ["due_payments", ""]
-
-
 class LastUsers(Widget):
     unique_name = "last_users"
 
@@ -138,10 +131,14 @@ class LastItems(Widget):
     unique_name = "last_items"
 
     def get_serializer_class(self) -> Serializer:
-        return ItemOutSerializer
+        return ItemWidgetSerializer
 
     def get_queryset(self):
-        return Item.objects.all()
+        return (
+            Item.objects.select_related("stock_unit", "category", "created_by")
+            .prefetch_related("stocks")
+            .all()
+        )
 
 
 async def gather_widgets_data(*widgets: Widget) -> dict[str, list[OrderedDict]]:
@@ -161,3 +158,15 @@ async def gather_widgets_data(*widgets: Widget) -> dict[str, list[OrderedDict]]:
 
     await asyncio.gather(*(task(widget) for widget in widgets))
     return result
+
+
+WIDGETMAP = {
+    WidgetsEnum.leftover_items: LeftoverItems,
+    WidgetsEnum.last_items: LastItems,
+    WidgetsEnum.last_invoices: LastInvoices,
+    WidgetsEnum.due_payments: DuePayments,
+    WidgetsEnum.best_customers: BestCustomers,
+    WidgetsEnum.balance: Balance,
+    WidgetsEnum.balange_graph: BalanceGraph,
+    WidgetsEnum.last_users: LastUsers,
+}
