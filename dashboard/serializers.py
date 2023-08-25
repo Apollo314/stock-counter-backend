@@ -1,5 +1,9 @@
+from datetime import timedelta
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from rest_framework.serializers import DecimalField
+from drf_spectacular.utils import extend_schema_field
+from rest_framework.renderers import serializers
+from rest_framework.serializers import DateField, DecimalField, ListField
 
 from inventory import models as inventory_models
 from inventory.serializers import (
@@ -12,7 +16,7 @@ from payments.models import PaymentAccount
 from payments.serializers import BankSerializer
 from stakeholder.models import Stakeholder
 from stakeholder.serializers import StakeholderBasicSerializer
-from users.serializers import ConciseUserSerializer
+from users.serializers import ConciseUserSerializer, UserSerializer
 from utilities.serializers import ModelSerializer
 
 
@@ -90,4 +94,43 @@ class BalanceWidgetSerializer(ModelSerializer):
             "account_number",
             "iban",
             "balance",
+        ]
+
+
+def get_balance_graph_date_ranges():
+    today = timezone.now().date()
+    dates = [today + timedelta(days=i) for i in range(-20, 20)]
+    return zip(dates, dates)
+
+
+class BalancesSerializer(serializers.Serializer):
+    """this exist to fill openapi schema correctly. no other reason"""
+
+    balance = DecimalField(19, 4)
+    range = ListField(child=DateField(), min_length=2, max_length=2)
+
+
+class BalanceGraphWidgetSerializer(ModelSerializer):
+    bank = BankSerializer()
+    balances = serializers.SerializerMethodField()
+
+    @extend_schema_field(BalancesSerializer(many=True))
+    def get_balances(self, obj):
+        date_ranges = list(get_balance_graph_date_ranges())
+        balance_names = [f"balance_{i}" for i in range(len(date_ranges))]
+        balances = [
+            {"balance": getattr(obj, name), "range": date_range}
+            for name, date_range in zip(balance_names, date_ranges)
+        ]
+        return balances
+
+    class Meta:
+        model = PaymentAccount
+        fields = [
+            "id",
+            "name",
+            "bank",
+            "account_number",
+            "iban",
+            "balances",
         ]
