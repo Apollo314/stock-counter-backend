@@ -1,7 +1,9 @@
 from django.http.response import JsonResponse
+from drf_spectacular.utils import extend_schema
 from rest_framework import permissions
 from rest_framework.request import HttpRequest
 from rest_framework.views import APIView
+from dashboard.serializers import DashboardSerializer
 from dashboard.widgets import WIDGETMAP, gather_widgets_data
 from asgiref.sync import async_to_sync
 
@@ -25,6 +27,9 @@ async def get_widget_data(user: User) -> dict:
 class DashboardView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    @extend_schema(responses={
+        200: DashboardSerializer
+    })
     def get(self, request: HttpRequest):
         data = async_to_sync(get_widget_data)(request.user)
         return JsonResponse(data)
