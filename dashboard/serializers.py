@@ -1,13 +1,18 @@
+from django.utils.translation import gettext_lazy as _
+from rest_framework.serializers import DecimalField
+
+from inventory import models as inventory_models
 from inventory.serializers import (
     CategorySerializer,
     ItemInSerializer,
     StockUnitSerializer,
 )
+from invoice import models as invoice_models
+from payments.models import PaymentAccount
+from payments.serializers import BankSerializer
+from stakeholder.models import Stakeholder
 from stakeholder.serializers import StakeholderBasicSerializer
 from users.serializers import ConciseUserSerializer
-from django.utils.translation import gettext_lazy as _
-from inventory import models as inventory_models
-from invoice import models as invoice_models
 from utilities.serializers import ModelSerializer
 
 
@@ -51,4 +56,38 @@ class InvoiceWidgetSerializer(ModelSerializer):
             "created_by",
             "total",
             "total_with_tax",
+        ]
+
+
+class BestCustomerWidgetSerializer(ModelSerializer):
+    cash_in = DecimalField(max_digits=19, decimal_places=4)
+
+    class Meta:
+        model = Stakeholder
+        fields = [
+            "id",
+            "name",
+            "role",
+            "shortname",
+            "phone",
+            "email",
+            "vkntckn",
+            "address",
+            "cash_in",
+        ]
+
+
+class BalanceWidgetSerializer(ModelSerializer):
+    bank = BankSerializer()
+    balance = DecimalField(max_digits=19, decimal_places=4)
+
+    class Meta:
+        model = PaymentAccount
+        fields = [
+            "id",
+            "name",
+            "bank",
+            "account_number",
+            "iban",
+            "balance",
         ]
