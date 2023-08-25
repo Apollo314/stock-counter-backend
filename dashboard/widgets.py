@@ -93,12 +93,39 @@ class LeftoverItems(Widget):
         )
 
 
-class BestCustomers:
+class BestCustomers(Widget):
     """Most revenue generating customers"""
 
-    unique_name = "best_customers"
+    def get_serializer_class(self) -> Serializer:
+        return StakeholderBasicSerializer
 
-    pass
+    def get_queryset(self) -> QuerySet:
+        return (
+            Stakeholder.objects.filter(
+                role__in=[
+                    StakeholderRole.customer,
+                    StakeholderRole.customer_and_supplier,
+                ]
+            )
+            .alias(
+                cash_in=Coalesce(
+                    Sum(
+                        "invoice__total",
+                        filter=Q(invoice__invoice_type=InvoiceType.sale),
+                    ),
+                    Decimal(0),
+                ),
+                cash_out=Coalesce(
+                    Sum(
+                        "invoice__total",
+                        filter=Q(invoice__invoice_type=InvoiceType.refund_sale),
+                    ),
+                    Decimal(0),
+                ),
+            )
+            .annotate(cash_in=F("cash_in"))
+            .order_by("-cash_in")
+        )
 
 
 class Balance:
