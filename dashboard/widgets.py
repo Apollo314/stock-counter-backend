@@ -1,23 +1,30 @@
-from abc import ABC, abstractmethod
 import asyncio
+from abc import ABC, abstractmethod
 from collections import defaultdict
-
 from datetime import timedelta
+from decimal import Decimal
 from typing import Any, OrderedDict, TypeAlias
+
 from asgiref.sync import sync_to_async
-from django.db.models import QuerySet
-
+from django.db.models import F, Q, QuerySet, Sum
+from django.db.models.functions import Coalesce
 from django.utils import timezone
-
 from rest_framework.serializers import Serializer
-from dashboard.enums import WidgetsEnum
-from dashboard.serializers import InvoiceWidgetSerializer, ItemWidgetSerializer
 
+from dashboard.enums import WidgetsEnum
+from dashboard.serializers import (
+    BalanceWidgetSerializer,
+    BestCustomerWidgetSerializer,
+    InvoiceWidgetSerializer,
+    ItemWidgetSerializer,
+)
 from inventory.models import Item, StockMovement, WarehouseItemStock
 from invoice.models import Invoice
-
+from payments.models import PaymentAccount
+from stakeholder.models import Stakeholder, StakeholderRole
 from users.models import User
 from users.serializers import UserSerializer
+from utilities.enums import InvoiceType
 
 JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
 
@@ -57,8 +64,6 @@ class Widget(ABC):
 class DuePayments:  # (Widget):
     """Payments that are needed to be made or received"""
 
-    unique_name = "due_payments"
-
 
 class LastInvoices(Widget):
     """Last created Invoices"""
@@ -72,8 +77,6 @@ class LastInvoices(Widget):
 
 class LeftoverItems(Widget):
     """items that are not sold in a long time and are in stock"""
-
-    unique_name = "leftover_items"
 
     def get_serializer_class(self) -> Serializer:
         return ItemWidgetSerializer
@@ -97,7 +100,7 @@ class BestCustomers(Widget):
     """Most revenue generating customers"""
 
     def get_serializer_class(self) -> Serializer:
-        return StakeholderBasicSerializer
+        return BestCustomerWidgetSerializer
 
     def get_queryset(self) -> QuerySet:
         return (
@@ -128,12 +131,23 @@ class BestCustomers(Widget):
         )
 
 
-class Balance:
-    """Balance for one or all bank accounts"""
+class Balance(Widget):
+    """Balance for company payment accounts"""
 
-    unique_name = "balance"
+    def get_serializer_class(self) -> Serializer:
+        return BalanceWidgetSerializer
 
-    pass
+    def get_queryset(self) -> QuerySet:
+        company_accounts = (
+            PaymentAccount.objects.select_related("bank")
+            .filter(stakeholder=None)
+            .alias(
+                cash_in=Coalesce(Sum("payments_received__amount"), Decimal(0)),
+                cash_out=Coalesce(Sum("payments_made__amount"), Decimal(0)),
+            )
+            .annotate(balance=F("cash_in") - F("cash_out"))
+        )
+        return company_accounts
 
 
 class BalanceGraph:
