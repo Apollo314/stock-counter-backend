@@ -4,19 +4,21 @@ from collections import defaultdict
 from datetime import timedelta
 from decimal import Decimal
 from typing import Any, OrderedDict, TypeAlias
+from django.utils import timezone
 
 from asgiref.sync import sync_to_async
 from django.db.models import F, Q, QuerySet, Sum
 from django.db.models.functions import Coalesce
-from django.utils import timezone
 from rest_framework.serializers import Serializer
 
 from dashboard.enums import WidgetsEnum
 from dashboard.serializers import (
+    BalanceGraphWidgetSerializer,
     BalanceWidgetSerializer,
     BestCustomerWidgetSerializer,
     InvoiceWidgetSerializer,
     ItemWidgetSerializer,
+    get_balance_graph_date_ranges,
 )
 from inventory.models import Item, StockMovement, WarehouseItemStock
 from invoice.models import Invoice
@@ -150,12 +152,53 @@ class Balance(Widget):
         return company_accounts
 
 
-class BalanceGraph:
+class BalanceGraph(Widget):
     """Same as Balance but with graph"""
 
     unique_name = "balance_graph"
 
-    pass
+    def get_serializer_class(self) -> Serializer:
+        return BalanceGraphWidgetSerializer
+
+    def get_queryset(self) -> QuerySet:
+        # last 30 days
+        date_ranges = get_balance_graph_date_ranges()
+        cash_ins = {}
+        cash_outs = {}
+        balances = {}
+
+        for i, (date1, date2) in enumerate(date_ranges):
+            cash_in = Coalesce(
+                Sum(
+                    "payments_received__amount",
+                    filter=Q(payments_received__due_date__range=[date1, date2]),
+                ),
+                Decimal(0),
+            )
+            cash_out = Coalesce(
+                Sum(
+                    "payments_made__amount",
+                    filter=Q(payments_made__due_date__range=[date1, date2]),
+                ),
+                Decimal(0),
+            )
+
+            cash_in_name = f"cash_in_{i}"
+            cash_out_name = f"cash_out_{i}"
+            balance = F(cash_in_name) - F(cash_out_name)
+
+            cash_ins[cash_in_name] = cash_in
+            cash_outs[cash_out_name] = cash_out
+            balances[f"balance_{i}"] = balance
+
+        return (
+            PaymentAccount.objects.select_related("bank")
+            .filter(stakeholder=None)
+            .alias(
+                **cash_ins,
+                **cash_outs,
+            )
+        ).annotate(**balances)
 
 
 class LastUsers(Widget):
