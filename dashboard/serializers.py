@@ -1,4 +1,5 @@
 from datetime import timedelta
+
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
@@ -134,3 +135,14 @@ class BalanceGraphWidgetSerializer(ModelSerializer):
             "iban",
             "balances",
         ]
+
+
+class DashboardSerializer(serializers.Serializer):
+    leftover_items = ItemWidgetSerializer(required=False)
+    last_items = ItemWidgetSerializer(required=False)
+    last_invoices = InvoiceWidgetSerializer(required=False)
+    # due_payments =
+    best_customers = BestCustomerWidgetSerializer(required=False)
+    balance = BalanceWidgetSerializer(required=False)
+    balange_graph = BalanceGraphWidgetSerializer(required=False)
+    last_users = UserSerializer(required=False)
