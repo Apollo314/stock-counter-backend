@@ -1,17 +1,15 @@
-import asyncio
 from abc import ABC, abstractmethod
-from collections import defaultdict
 from datetime import timedelta
 from decimal import Decimal
-from typing import Any, OrderedDict, TypeAlias
+from typing import Any, TypeAlias
 from django.utils import timezone
 
-from asgiref.sync import sync_to_async
 from django.db.models import F, Q, QuerySet, Sum
 from django.db.models.functions import Coalesce
 from rest_framework.serializers import Serializer
 
 from dashboard.enums import WidgetsEnum
+from dashboard.models import SubscribedWidget
 from dashboard.serializers import (
     BalanceGraphWidgetSerializer,
     BalanceWidgetSerializer,
@@ -32,9 +30,9 @@ JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | 
 
 
 class Widget(ABC):
-    def __init__(self, unique_name: str, **user_inputs) -> None:
+    def __init__(self, subscribed_widget: SubscribedWidget, **user_inputs) -> None:
         self.user_inputs = user_inputs
-        self.unique_name = unique_name
+        self.subscribed_widget = subscribed_widget
 
     @abstractmethod
     def get_serializer_class(self) -> Serializer:
@@ -223,25 +221,6 @@ class LastItems(Widget):
             .prefetch_related("stocks")
             .all()
         )
-
-
-async def gather_widgets_data(*widgets: Widget) -> dict[str, list[OrderedDict]]:
-    """takes widgets, asyncronously queries their querysets, returns them in a dict
-    with the unique_name of the widget as the key"""
-
-    result = defaultdict(list)
-
-    async def task(widget: Widget):
-        queryset = widget.get_queryset()
-        instances = []
-        async for instance in queryset:
-            instances.append(instance)
-        result[widget.unique_name] = await sync_to_async(widget.serialized_data)(
-            instances
-        )
-
-    await asyncio.gather(*(task(widget) for widget in widgets))
-    return result
 
 
 WIDGETMAP = {

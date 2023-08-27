@@ -2,9 +2,17 @@ from datetime import timedelta
 
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.utils import PolymorphicProxySerializer, extend_schema_field
 from rest_framework.renderers import serializers
-from rest_framework.serializers import DateField, DecimalField, ListField
+from rest_framework.serializers import (
+    CharField,
+    DateField,
+    DecimalField,
+    IntegerField,
+    JSONField,
+    ListField,
+    SerializerMethodField,
+)
 
 from inventory import models as inventory_models
 from inventory.serializers import (
@@ -138,11 +146,27 @@ class BalanceGraphWidgetSerializer(ModelSerializer):
 
 
 class DashboardSerializer(serializers.Serializer):
-    leftover_items = ItemWidgetSerializer(required=False)
-    last_items = ItemWidgetSerializer(required=False)
-    last_invoices = InvoiceWidgetSerializer(required=False)
-    # due_payments =
-    best_customers = BestCustomerWidgetSerializer(required=False)
-    balance = BalanceWidgetSerializer(required=False)
-    balange_graph = BalanceGraphWidgetSerializer(required=False)
-    last_users = UserSerializer(required=False)
+    """This doesn't really do anything other than hinting openapi."""
+
+    id = IntegerField()
+    widget_index = IntegerField()
+    user_settings = JSONField()
+    widget_name = CharField()
+    widget_data = SerializerMethodField()
+
+    @extend_schema_field(
+        PolymorphicProxySerializer(
+            component_name="widget_data",
+            serializers=[
+                ItemWidgetSerializer,
+                InvoiceWidgetSerializer,
+                BestCustomerWidgetSerializer,
+                BalanceWidgetSerializer,
+                BalanceGraphWidgetSerializer,
+                UserSerializer,
+            ],
+            resource_type_field_name="type",
+        )
+    )
+    def get_widget_data(self, obj):
+        pass
