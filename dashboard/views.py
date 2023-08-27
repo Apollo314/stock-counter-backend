@@ -41,7 +41,7 @@ async def gather_widgets_data(*widgets: Widget):
 
 
 async def get_widget_data(user: User) -> dict:
-    subscribed_widgets = user.widgets.all()
+    subscribed_widgets = user.widgets.all().order_by('widget_index')
     widget_instances = []
 
     async for subscribed_widget in subscribed_widgets:
