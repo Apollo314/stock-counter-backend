@@ -42,6 +42,7 @@ class PaymentAccountOutSerializer(ModelSerializer):
             "account_number",
             "iban",
             "stakeholder",
+            "account_currency",
         ]
 
 
@@ -53,6 +54,7 @@ class PaymentAccountOutSimpleSerializer(ModelSerializer):
         fields = [
             "name",
             "stakeholder",
+            "account_currency",
         ]
 
 
@@ -84,6 +86,7 @@ class PaymentAccountInSerializer(ModelSerializer):
             "account_number",
             "iban",
             "stakeholder",
+            "account_currency",
         ]
 
 

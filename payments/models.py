@@ -25,7 +25,13 @@ class PaymentAccount(CreateUpdateInfo, InactivatedMixin["PaymentAccount"]):
         blank=True,
         on_delete=models.CASCADE,
     )
-
+    account_currency = models.CharField(
+        _("Account currency"),
+        max_length=4,
+        choices=Currency.choices,
+        default=Currency.turkish_lira,
+        blank=False,
+    )
     payments_made: models.QuerySet["Payment"]
     payments_received: models.QuerySet["Payment"]
 
