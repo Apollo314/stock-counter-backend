@@ -16,9 +16,12 @@ class SubscribedWidget(models.Model):
     user = models.ForeignKey(
         User, verbose_name=_("User"), on_delete=models.CASCADE, related_name="widgets"
     )
-    user_given_name = models.CharField(max_length=50)
-    widget = models.CharField(
-        _("Widget"),
+
+    widget_index = models.IntegerField(default=1)
+    user_settings = models.JSONField(null=True, blank=True)
+
+    widget_name = models.CharField(
+        _("Widget Name"),
         max_length=100,
         choices=WidgetsEnum.choices,
     )
