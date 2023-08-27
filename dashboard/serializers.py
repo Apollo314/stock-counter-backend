@@ -103,6 +103,7 @@ class BalanceWidgetSerializer(ModelSerializer):
             "account_number",
             "iban",
             "balance",
+            "account_currency"
         ]
 
 
@@ -142,6 +143,7 @@ class BalanceGraphWidgetSerializer(ModelSerializer):
             "account_number",
             "iban",
             "balances",
+            "account_currency",
         ]
 
 
