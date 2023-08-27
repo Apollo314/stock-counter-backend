@@ -70,6 +70,7 @@ class Payment(CreateUpdateInfo):
     )
     additional_info = models.TextField(_("Additional info"), null=True, blank=True)
     due_date = models.DateField(_("Due date"), null=True, blank=True)
+    payment_done = models.BooleanField(_("Payment is concluded"), default=False)
 
 
 class InvoicePayment(models.Model):
