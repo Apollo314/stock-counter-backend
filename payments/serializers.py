@@ -3,10 +3,9 @@ from rest_framework import serializers
 from rest_framework.fields import OrderedDict
 
 from payments.models import Bank, InvoicePayment, Payment, PaymentAccount
-from stakeholder.serializers import StakeholderSerializer
+from stakeholder.serializers import StakeholderBasicSerializer, StakeholderSerializer
 from users.serializers import UserSerializer
-from utilities.serializer_helpers import (CurrentUserCreatedBy,
-                                          CurrentUserDefault)
+from utilities.serializer_helpers import CurrentUserCreatedBy, CurrentUserDefault
 from utilities.serializers import ModelSerializer
 
 
@@ -47,7 +46,7 @@ class PaymentAccountOutSerializer(ModelSerializer):
 
 
 class PaymentAccountOutSimpleSerializer(ModelSerializer):
-    stakeholder = StakeholderSerializer(required=False)
+    stakeholder = StakeholderBasicSerializer(required=False)
 
     class Meta:
         model = PaymentAccount

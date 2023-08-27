@@ -20,7 +20,8 @@ from dashboard.serializers import (
 )
 from inventory.models import Item, StockMovement, WarehouseItemStock
 from invoice.models import Invoice
-from payments.models import PaymentAccount
+from payments.models import Payment, PaymentAccount
+from payments.serializers import PaymentOutSerializer
 from stakeholder.models import Stakeholder, StakeholderRole
 from users.models import User
 from users.serializers import UserSerializer
@@ -61,8 +62,26 @@ class Widget(ABC):
         return serializer.data
 
 
-class DuePayments:  # (Widget):
+class DuePayments(Widget):
     """Payments that are needed to be made or received"""
+
+    def get_serializer_class(self) -> Serializer:
+        return PaymentOutSerializer
+
+    def get_queryset(self) -> QuerySet:
+        today = timezone.now().date()
+        sevendaysfromnow = today + timedelta(days=7)
+        payments = (
+            Payment.objects.select_related(
+                "payer__stakeholder",
+                "receiver__stakeholder",
+                "created_by",
+                "updated_by",
+            )
+            .filter(payment_done=False, due_date__lte=sevendaysfromnow)
+            .order_by("due_date", "amount")
+        )
+        return payments
 
 
 class LastInvoices(Widget):
