@@ -106,16 +106,19 @@ class LeftoverItems(Widget):
 
     def get_queryset(self):
         date = timezone.now() - timedelta(days=30)
+        invoices = Invoice.objects.filter(
+            last_payment_date__gt=date, invoice_type=InvoiceType.sale
+        )
         stock_movements = StockMovement.objects.select_related(
             "invoice_item__invoice"
-        ).filter(invoice_item__invoice__last_payment_date__lt=date)
+        ).filter(invoice_item__invoice__in=invoices)
         warehouse_item_stocks = WarehouseItemStock.objects.filter(
             stockmovement__in=stock_movements
         )
         return (
             Item.objects.select_related("stock_unit", "category", "created_by")
             .prefetch_related("stocks")
-            .filter(stocks__in=warehouse_item_stocks)
+            .exclude(stocks__in=warehouse_item_stocks)
         )
 
 
