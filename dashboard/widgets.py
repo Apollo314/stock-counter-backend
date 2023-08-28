@@ -171,20 +171,21 @@ class Balance(Widget):
 
 class BalanceGraph(Widget):
     """Same as Balance but with graph"""
-
     unique_name = "balance_graph"
 
     def get_serializer_class(self) -> Serializer:
         return BalanceGraphWidgetSerializer
 
     def get_queryset(self) -> QuerySet:
-        # last 30 days
         date_ranges = get_balance_graph_date_ranges()
         cash_ins = {}
         cash_outs = {}
         balances = {}
-
+        first_date = None
         for i, (date1, date2) in enumerate(date_ranges):
+            if i == 0:
+                first_date = date1
+
             cash_in = Coalesce(
                 Sum(
                     "payments_received__amount",
@@ -199,7 +200,6 @@ class BalanceGraph(Widget):
                 ),
                 Decimal(0),
             )
-
             cash_in_name = f"cash_in_{i}"
             cash_out_name = f"cash_out_{i}"
             balance = F(cash_in_name) - F(cash_out_name)
@@ -207,6 +207,25 @@ class BalanceGraph(Widget):
             cash_ins[cash_in_name] = cash_in
             cash_outs[cash_out_name] = cash_out
             balances[f"balance_{i}"] = balance
+
+        cash_in_before = Coalesce(
+            Sum(
+                "payments_received__amount",
+                filter=Q(payments_received__due_date__lt=first_date),
+            ),
+            Decimal(0),
+        )
+        cash_out_before = Coalesce(
+            Sum(
+                "payments_made__amount",
+                filter=Q(payments_received__due_date__lt=first_date),
+            ),
+            Decimal(0),
+        )
+        cash_ins["cash_in_before"] = cash_in_before
+        cash_outs["cash_out_before"] = cash_out_before
+        balance_before = F("cash_in_before") - F("cash_out_before")
+        balances["balance_before"] = balance_before
 
         return (
             PaymentAccount.objects.select_related("bank")
