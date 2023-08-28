@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import PolymorphicProxySerializer, extend_schema_field
 from rest_framework.renderers import serializers
 from rest_framework.serializers import (
-    CharField,
+    ChoiceField,
     DateField,
     DecimalField,
     IntegerField,
@@ -14,6 +14,8 @@ from rest_framework.serializers import (
     ListField,
     SerializerMethodField,
 )
+from dashboard.enums import WidgetsEnum
+from dashboard.models import SubscribedWidget
 
 from inventory import models as inventory_models
 from inventory.serializers import (
@@ -27,6 +29,7 @@ from payments.serializers import BankSerializer
 from stakeholder.models import Stakeholder
 from stakeholder.serializers import StakeholderBasicSerializer
 from users.serializers import ConciseUserSerializer, UserSerializer
+from utilities.serializer_helpers import CurrentUserDefault
 from utilities.serializers import ModelSerializer
 
 
@@ -158,7 +161,7 @@ class DashboardSerializer(serializers.Serializer):
     id = IntegerField()
     widget_index = IntegerField()
     user_settings = JSONField()
-    widget_name = CharField()
+    widget_name = ChoiceField(choices=WidgetsEnum.choices)
     widget_data = SerializerMethodField()
 
     @extend_schema_field(
@@ -176,4 +179,13 @@ class DashboardSerializer(serializers.Serializer):
         )
     )
     def get_widget_data(self, obj):
+        """do not delete. this is for openapi"""
         pass
+
+
+class SubscribedWidgetSerializer(ModelSerializer):
+    user = serializers.HiddenField(default=CurrentUserDefault())
+
+    class Meta:
+        model = SubscribedWidget
+        fields = ["id", "user", "widget_index", "user_settings", "widget_name"]
