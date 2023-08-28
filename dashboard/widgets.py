@@ -51,13 +51,17 @@ class Widget(ABC):
         print(user_inputs)
         pass
 
-    def serialized_data(self, serializer_data: Any) -> JSON:
+    def serialized_data(self, serializer_data: Any, context=None) -> JSON:
         """serialized data, should return json serializable object"""
         if isinstance(serializer_data, list):
-            serializer = self.get_serializer_class()(data=serializer_data, many=True)
+            serializer = self.get_serializer_class()(
+                data=serializer_data, many=True, context=context
+            )
             serializer.is_valid()
         else:
-            serializer = self.get_serializer_class()(data=serializer_data)
+            serializer = self.get_serializer_class()(
+                data=serializer_data, context=context
+            )
             serializer.is_valid()
         return serializer.data
 
@@ -171,6 +175,7 @@ class Balance(Widget):
 
 class BalanceGraph(Widget):
     """Same as Balance but with graph"""
+
     unique_name = "balance_graph"
 
     def get_serializer_class(self) -> Serializer:
