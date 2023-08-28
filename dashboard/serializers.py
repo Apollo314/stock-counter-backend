@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Literal
 
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -103,13 +104,15 @@ class BalanceWidgetSerializer(ModelSerializer):
             "account_number",
             "iban",
             "balance",
-            "account_currency"
+            "account_currency",
         ]
 
 
-def get_balance_graph_date_ranges():
+def get_balance_graph_date_ranges(
+    scale: Literal["days"] | Literal["weeks"] | Literal["months"] = "days",
+):
     today = timezone.now().date()
-    dates = [today + timedelta(days=i) for i in range(-20, 20)]
+    dates = [today + timedelta(**{scale: i}) for i in range(-20, 20)]
     return zip(dates, dates)
 
 
@@ -123,6 +126,7 @@ class BalancesSerializer(serializers.Serializer):
 class BalanceGraphWidgetSerializer(ModelSerializer):
     bank = BankSerializer()
     balances = serializers.SerializerMethodField()
+    balance_before = DecimalField(19, 4)
 
     @extend_schema_field(BalancesSerializer(many=True))
     def get_balances(self, obj):
@@ -143,6 +147,7 @@ class BalanceGraphWidgetSerializer(ModelSerializer):
             "account_number",
             "iban",
             "balances",
+            "balance_before",
             "account_currency",
         ]
 
