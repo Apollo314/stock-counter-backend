@@ -6,4 +6,4 @@ class InventoryConfig(AppConfig):
     name = "inventory"
 
     def ready(self):
-        from inventory import signals as _
+        from inventory import signals as _  # noqa: F401

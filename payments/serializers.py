@@ -24,9 +24,9 @@ class BankOutSerializer(BankSerializer):
 
 
 class PaymentAccountOutSerializer(ModelSerializer):
-    created_by = UserSerializer()
-    updated_by = UserSerializer()
-    bank = BankSerializer()
+    created_by = UserSerializer(required=False)
+    updated_by = UserSerializer(required=False)
+    bank = BankSerializer(required=False)
     stakeholder = StakeholderSerializer(required=False)
 
     class Meta:
