@@ -36,7 +36,7 @@ class PaymentAccount(CreateUpdateInfo, InactivatedMixin["PaymentAccount"]):
     payments_received: models.QuerySet["Payment"]
 
     class Meta:
-        unique_together = [["name", "bank", "stakeholder"]]
+        unique_together = [["name", "stakeholder"]]
 
 
 class PaymentType(models.TextChoices):
