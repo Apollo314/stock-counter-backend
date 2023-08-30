@@ -115,10 +115,13 @@ class LeftoverItems(Widget):
         warehouse_item_stocks = WarehouseItemStock.objects.filter(
             stockmovement__in=stock_movements
         )
+        sevendaysago = timezone.now() - timedelta(days=7)
         return (
             Item.objects.select_related("stock_unit", "category", "created_by")
             .prefetch_related("stocks")
             .exclude(stocks__in=warehouse_item_stocks)
+            .exclude(stocks__amount_db__lte=0)
+            .exclude(created_at__gt=sevendaysago)
         )
 
 
