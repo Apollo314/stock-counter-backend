@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django_filters.utils import timezone
 
 from invoice.models import Invoice
 from stakeholder.models import Stakeholder
@@ -84,7 +85,7 @@ class Payment(CreateUpdateInfo):
 
 
 class InvoicePayment(models.Model):
-    payment = models.ForeignKey(
+    payment = models.OneToOneField(
         Payment, verbose_name=_("Payment Info"), on_delete=models.CASCADE
     )
     invoice = models.ForeignKey(
