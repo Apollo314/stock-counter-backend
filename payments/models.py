@@ -44,6 +44,10 @@ class PaymentType(models.TextChoices):
     cheque = "cheque"
 
 
+def today():
+    return timezone.now().date()
+
+
 class Payment(CreateUpdateInfo):
     amount = models.DecimalField(
         _("Amount"),
@@ -75,7 +79,7 @@ class Payment(CreateUpdateInfo):
         default=PaymentType.cash,
     )
     additional_info = models.TextField(_("Additional info"), null=True, blank=True)
-    due_date = models.DateField(_("Due date"), null=True, blank=True)
+    due_date = models.DateField(_("Due date"), null=True, blank=True, default=today)
     payment_done = models.BooleanField(_("Payment is concluded"), default=False)
 
 
