@@ -4,7 +4,7 @@ from decimal import Decimal
 from typing import Any, TypeAlias
 from django.utils import timezone
 
-from django.db.models import F, Q, QuerySet, Sum
+from django.db.models import F, Q, OuterRef, QuerySet, Subquery, Sum
 from django.db.models.functions import Coalesce
 from rest_framework.serializers import Serializer
 
@@ -164,16 +164,26 @@ class Balance(Widget):
         return BalanceWidgetSerializer
 
     def get_queryset(self) -> QuerySet:
-        company_accounts = (
-            PaymentAccount.objects.select_related("bank")
-            .filter(stakeholder=None)
-            .alias(
-                cash_in=Coalesce(Sum("payments_received__amount"), Decimal(0)),
-                cash_out=Coalesce(Sum("payments_made__amount"), Decimal(0)),
-            )
-            .annotate(balance=F("cash_in") - F("cash_out"))
+        received_payments = (
+            Payment.objects.filter(receiver_id=OuterRef("id"))
+            .values("receiver_id")
+            .annotate(cash_in=Sum("amount"))
         )
-        return company_accounts
+        made_payments = (
+            Payment.objects.filter(payer_id=OuterRef("id"))
+            .values("payer_id")
+            .annotate(cash_out=Sum("amount"))
+        )
+        return (
+            PaymentAccount.objects.filter(stakeholder=None)
+            .annotate(
+                balance=Coalesce(
+                    Subquery(received_payments.values("cash_in")[:1]), Decimal(0)
+                )
+                - Coalesce(Subquery(made_payments.values("cash_out")[:1]), Decimal(0))
+            )
+            .select_related("bank")
+        )
 
 
 class BalanceGraph(Widget):
@@ -186,63 +196,55 @@ class BalanceGraph(Widget):
 
     def get_queryset(self) -> QuerySet:
         date_ranges = get_balance_graph_date_ranges()
-        cash_ins = {}
-        cash_outs = {}
         balances = {}
         first_date = None
         for i, (date1, date2) in enumerate(date_ranges):
             if i == 0:
                 first_date = date1
 
-            cash_in = Coalesce(
-                Sum(
-                    "payments_received__amount",
-                    filter=Q(payments_received__due_date__range=[date1, date2]),
-                ),
-                Decimal(0),
+            received_payments = (
+                Payment.objects.filter(
+                    receiver_id=OuterRef("id"), due_date__range=[date1, date2]
+                )
+                .values("receiver_id")
+                .annotate(cash_in=Sum("amount"))
             )
-            cash_out = Coalesce(
-                Sum(
-                    "payments_made__amount",
-                    filter=Q(payments_made__due_date__range=[date1, date2]),
-                ),
-                Decimal(0),
+            received_payments = Coalesce(
+                received_payments.values("cash_in")[:1], Decimal(0)
             )
-            cash_in_name = f"cash_in_{i}"
-            cash_out_name = f"cash_out_{i}"
-            balance = F(cash_in_name) - F(cash_out_name)
-
-            cash_ins[cash_in_name] = cash_in
-            cash_outs[cash_out_name] = cash_out
+            made_payments = (
+                Payment.objects.filter(
+                    payer_id=OuterRef("id"), due_date__range=[date1, date2]
+                )
+                .values("payer_id")
+                .annotate(cash_out=Sum("amount"))
+            )
+            made_payments = Coalesce(made_payments.values("cash_out")[:1], Decimal(0))
+            balance = received_payments - made_payments
             balances[f"balance_{i}"] = balance
+        cash_in_before = (
+            Payment.objects.filter(receiver_id=OuterRef("id"), due_date__lt=first_date)
+            .values("receiver_id")
+            .annotate(cash_in=Sum("amount"))
+        )
+        cash_in_before = Coalesce(cash_in_before.values("cash_in")[:1], Decimal(0))
+        cash_out_before = (
+            Payment.objects.filter(payer_id=OuterRef("id"), due_date__lt=first_date)
+            .values("payer_id")
+            .annotate(cash_out=Sum("amount"))
+        )
+        cash_out_before = Coalesce(cash_out_before.values("cash_out")[:1], Decimal(0))
 
-        cash_in_before = Coalesce(
-            Sum(
-                "payments_received__amount",
-                filter=Q(payments_received__due_date__lt=first_date),
-            ),
-            Decimal(0),
-        )
-        cash_out_before = Coalesce(
-            Sum(
-                "payments_made__amount",
-                filter=Q(payments_received__due_date__lt=first_date),
-            ),
-            Decimal(0),
-        )
-        cash_ins["cash_in_before"] = cash_in_before
-        cash_outs["cash_out_before"] = cash_out_before
-        balance_before = F("cash_in_before") - F("cash_out_before")
+        balance_before = cash_in_before - cash_out_before
         balances["balance_before"] = balance_before
-
-        return (
+        output = (
             PaymentAccount.objects.select_related("bank")
             .filter(stakeholder=None)
-            .alias(
-                **cash_ins,
-                **cash_outs,
+            .annotate(
+                **balances,
             )
-        ).annotate(**balances)
+        )
+        return output
 
 
 class LastUsers(Widget):
