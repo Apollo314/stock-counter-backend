@@ -281,10 +281,8 @@ msgid "Due date"
 msgstr "Son ödeme tarihi"
 
 #: payments/models.py:79
-#, fuzzy
-#| msgid "Payment account name"
 msgid "Payment is concluded"
-msgstr "Ödeme hesabı adı"
+msgstr "Ödeme tamamlandı."
 
 #: payments/models.py:84 payments/serializers.py:143
 msgid "Payment Info"

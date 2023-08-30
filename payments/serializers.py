@@ -97,10 +97,15 @@ class PaymentSerializer(ModelSerializer):
     updated_by = serializers.HiddenField(
         default=CurrentUserDefault(), label=_("Updated by")
     )
+    field_overrides = {
+        "amount": {"component": "money-input"},
+        "payment_done": {"component": "checkbox"},
+    }
 
     class Meta:
         model = Payment
         fields = [
+            "id",
             "created_by",
             "updated_by",
             "created_at",
@@ -112,6 +117,7 @@ class PaymentSerializer(ModelSerializer):
             "additional_info",
             "due_date",
             "payment_type",
+            "payment_done",
         ]
 
 
@@ -136,6 +142,7 @@ class PaymentOutSerializer(ModelSerializer):
             "additional_info",
             "due_date",
             "payment_type",
+            "payment_done",
         ]
 
 
@@ -151,11 +158,12 @@ class InvoicePaymentSerializer(ModelSerializer):
     def update(self, instance: InvoicePayment, validated_data: OrderedDict):
         payment_data = validated_data.pop("payment")
         PaymentSerializer().update(instance.payment, payment_data)
-        return super().update(validated_data)
+        return super().update(instance, validated_data)
 
     class Meta:
         model = InvoicePayment
         fields = [
+            "id",
             "payment",
             "invoice",
         ]

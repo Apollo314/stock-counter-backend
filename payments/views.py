@@ -1,4 +1,3 @@
-from django.db.models import Prefetch
 from django.utils.translation import gettext_lazy as _
 from rest_framework.viewsets import ModelViewSet
 
@@ -75,7 +74,10 @@ class PaymentAccountViewset(ModelViewSet):
             "exact": {
                 "component": "stakeholder-selector",
                 "props": {"label": _("Stakeholder")},
-            }
+            },
+            "isnull": {
+                "component": "checkbox",
+            },
         },
         "account_number": {
             "contains": {
@@ -185,5 +187,15 @@ class PaymentViewset(ModelViewSet):
 
 
 class InvoicePaymentViewset(ModelViewSet):
-    queryset = models.InvoicePayment.objects.all()
+    queryset = models.InvoicePayment.objects.select_related("payment").all()
     serializer_class = serializers.InvoicePaymentSerializer
+    filter_backends = [DjangoFilterBackend]
+    ordering = ["id"]
+    filterset_fields = {
+        "invoice": {
+            "exact": {
+                "component": "invoice-select",
+                "props": {"label": _("Invoice")},
+            }
+        },
+    }
