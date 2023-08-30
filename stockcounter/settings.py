@@ -21,9 +21,7 @@ django_stubs_ext.monkeypatch()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 LOCALE_PATHS = (BASE_DIR / "locale",)
-# dotenv
-for file in BASE_DIR.glob("*.env"):
-    dotenv.load_dotenv(file)
+dotenv.load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 DEBUG = os.environ["DEBUG"] == "True"
